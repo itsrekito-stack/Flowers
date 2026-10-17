@@ -15,3 +15,11 @@ jobs:
           python-version: '3.11'
       - name: Validate project structure and authored UI
         run: python tools/qa.py
+
+      - name: Install pinned Rojo CLI
+        run: |
+          curl -fLsS --retry 3 -o /tmp/rojo.zip https://github.com/rojo-rbx/rojo/releases/download/v7.7.1/rojo-7.7.1-linux-x86_64.zip
+          unzip -q /tmp/rojo.zip -d /tmp/rojo
+          chmod +x /tmp/rojo/rojo
+      - name: Build Roblox place with Rojo
+        run: /tmp/rojo/rojo build default.project.json -o /tmp/FlowersQA.rbxl
