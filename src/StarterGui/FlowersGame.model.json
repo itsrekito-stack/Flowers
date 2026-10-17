@@ -1,0 +1,974 @@
+{
+  "ClassName": "ScreenGui",
+  "Properties": {
+    "Enabled": true,
+    "IgnoreGuiInset": true,
+    "ResetOnSpawn": false,
+    "DisplayOrder": 9,
+    "ZIndexBehavior": "Sibling"
+  },
+  "Children": [
+    {
+      "ClassName": "Frame",
+      "Name": "GamePanel",
+      "Properties": {
+        "Size": {
+          "UDim2": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "Position": {
+          "UDim2": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "BackgroundTransparency": 1,
+        "BorderSizePixel": 0,
+        "Active": false
+      },
+      "Children": [
+        {
+          "ClassName": "Frame",
+          "Name": "InfoCard",
+          "Properties": {
+            "AnchorPoint": {
+              "Vector2": [
+                1,
+                0
+              ]
+            },
+            "Position": {
+              "UDim2": [
+                [
+                  1,
+                  -20
+                ],
+                [
+                  0,
+                  20
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  318
+                ],
+                [
+                  0,
+                  245
+                ]
+              ]
+            },
+            "BackgroundColor3": [
+              0.06274509803921569,
+              0.11372549019607843,
+              0.18823529411764706
+            ],
+            "BackgroundTransparency": 0.06,
+            "BorderSizePixel": 0
+          },
+          "Children": [
+            {
+              "ClassName": "UICorner",
+              "Name": "Corners",
+              "Properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    12
+                  ]
+                }
+              }
+            },
+            {
+              "ClassName": "UIStroke",
+              "Name": "Border",
+              "Properties": {
+                "Color": [
+                  0.16862745098039217,
+                  0.6901960784313725,
+                  0.8509803921568627
+                ],
+                "Transparency": 0.22,
+                "Thickness": 1.2
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Header",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      9
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      24
+                    ]
+                  ]
+                },
+                "Text": "FLOWERS  /  MINI RNG",
+                "Font": "GothamBold",
+                "TextSize": 17,
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Honey",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      40
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      25
+                    ]
+                  ]
+                },
+                "Text": "HONEY: 30",
+                "Font": "GothamBold",
+                "TextSize": 16,
+                "TextColor3": [
+                  0.9333333333333333,
+                  0.7176470588235294,
+                  0.29411764705882354
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Bee",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      71
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      20
+                    ]
+                  ]
+                },
+                "Text": "BEE: Worker Bee",
+                "Font": "GothamBold",
+                "TextSize": 13,
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Selected",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      98
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      20
+                    ]
+                  ]
+                },
+                "Text": "SEED: Daisy (1)",
+                "Font": "GothamMedium",
+                "TextSize": 13,
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "PlantStatus",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      127
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      23
+                    ]
+                  ]
+                },
+                "Text": "PLOT 1  |  EMPTY",
+                "Font": "GothamBold",
+                "TextSize": 13,
+                "TextColor3": [
+                  0.611764705882353,
+                  0.7254901960784313,
+                  0.8156862745098039
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "Frame",
+              "Name": "XPTrack",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      161
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      13
+                    ]
+                  ]
+                },
+                "BackgroundColor3": [
+                  0.17254901960784313,
+                  0.23137254901960785,
+                  0.3058823529411765
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": true
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        7
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "Frame",
+                  "Name": "Fill",
+                  "Properties": {
+                    "Size": {
+                      "UDim2": [
+                        [
+                          0,
+                          0
+                        ],
+                        [
+                          1,
+                          0
+                        ]
+                      ]
+                    },
+                    "BackgroundColor3": [
+                      0.06666666666666667,
+                      0.6941176470588235,
+                      0.8549019607843137
+                    ],
+                    "BorderSizePixel": 0
+                  },
+                  "Children": [
+                    {
+                      "ClassName": "UICorner",
+                      "Name": "Corners",
+                      "Properties": {
+                        "CornerRadius": {
+                          "UDim": [
+                            0,
+                            7
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "XPText",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      181
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      18
+                    ]
+                  ]
+                },
+                "Text": "0 / 10 XP",
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "TextColor3": [
+                  0.611764705882353,
+                  0.7254901960784313,
+                  0.8156862745098039
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Tip",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      211
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -28
+                    ],
+                    [
+                      0,
+                      20
+                    ]
+                  ]
+                },
+                "Text": "Roll → Plant → Level 3 → Harvest",
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "TextColor3": [
+                  0.611764705882353,
+                  0.7254901960784313,
+                  0.8156862745098039
+                ],
+                "TextXAlignment": "Left",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            }
+          ]
+        },
+        {
+          "ClassName": "Frame",
+          "Name": "ActionDock",
+          "Properties": {
+            "AnchorPoint": {
+              "Vector2": [
+                0.5,
+                1
+              ]
+            },
+            "Position": {
+              "UDim2": [
+                [
+                  0.5,
+                  0
+                ],
+                [
+                  1,
+                  -20
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  664
+                ],
+                [
+                  0,
+                  68
+                ]
+              ]
+            },
+            "BackgroundColor3": [
+              0.06274509803921569,
+              0.11372549019607843,
+              0.18823529411764706
+            ],
+            "BackgroundTransparency": 0.06,
+            "BorderSizePixel": 0
+          },
+          "Children": [
+            {
+              "ClassName": "UICorner",
+              "Name": "Corners",
+              "Properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    12
+                  ]
+                }
+              }
+            },
+            {
+              "ClassName": "UIStroke",
+              "Name": "Border",
+              "Properties": {
+                "Color": [
+                  0.16862745098039217,
+                  0.6901960784313725,
+                  0.8509803921568627
+                ],
+                "Transparency": 0.22,
+                "Thickness": 1.2
+              }
+            },
+            {
+              "ClassName": "TextButton",
+              "Name": "RollFlower",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      12
+                    ],
+                    [
+                      0,
+                      10
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      148
+                    ],
+                    [
+                      0,
+                      48
+                    ]
+                  ]
+                },
+                "AutoButtonColor": false,
+                "Text": "ROLL FLOWER · 8",
+                "TextSize": 12,
+                "TextWrapped": true,
+                "Font": "GothamBold",
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "BackgroundColor3": [
+                  0.09019607843137255,
+                  0.2823529411764706,
+                  0.396078431372549
+                ],
+                "BorderSizePixel": 0
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        10
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "UIStroke",
+                  "Name": "Border",
+                  "Properties": {
+                    "Color": [
+                      0.16862745098039217,
+                      0.6901960784313725,
+                      0.8509803921568627
+                    ],
+                    "Transparency": 0.22,
+                    "Thickness": 1.2
+                  }
+                }
+              ]
+            },
+            {
+              "ClassName": "TextButton",
+              "Name": "RollBee",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      172
+                    ],
+                    [
+                      0,
+                      10
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      148
+                    ],
+                    [
+                      0,
+                      48
+                    ]
+                  ]
+                },
+                "AutoButtonColor": false,
+                "Text": "ROLL BEE · 18",
+                "TextSize": 12,
+                "TextWrapped": true,
+                "Font": "GothamBold",
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "BackgroundColor3": [
+                  0.09019607843137255,
+                  0.2823529411764706,
+                  0.396078431372549
+                ],
+                "BorderSizePixel": 0
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        10
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "UIStroke",
+                  "Name": "Border",
+                  "Properties": {
+                    "Color": [
+                      0.16862745098039217,
+                      0.6901960784313725,
+                      0.8509803921568627
+                    ],
+                    "Transparency": 0.22,
+                    "Thickness": 1.2
+                  }
+                }
+              ]
+            },
+            {
+              "ClassName": "TextButton",
+              "Name": "Plant",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      332
+                    ],
+                    [
+                      0,
+                      10
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      148
+                    ],
+                    [
+                      0,
+                      48
+                    ]
+                  ]
+                },
+                "AutoButtonColor": false,
+                "Text": "PLANT",
+                "TextSize": 12,
+                "TextWrapped": true,
+                "Font": "GothamBold",
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "BackgroundColor3": [
+                  0.09411764705882353,
+                  0.4549019607843137,
+                  0.4980392156862745
+                ],
+                "BorderSizePixel": 0
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        10
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "UIStroke",
+                  "Name": "Border",
+                  "Properties": {
+                    "Color": [
+                      0.16862745098039217,
+                      0.6901960784313725,
+                      0.8509803921568627
+                    ],
+                    "Transparency": 0.22,
+                    "Thickness": 1.2
+                  }
+                }
+              ]
+            },
+            {
+              "ClassName": "TextButton",
+              "Name": "Harvest",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      492
+                    ],
+                    [
+                      0,
+                      10
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      148
+                    ],
+                    [
+                      0,
+                      48
+                    ]
+                  ]
+                },
+                "AutoButtonColor": false,
+                "Text": "HARVEST",
+                "TextSize": 12,
+                "TextWrapped": true,
+                "Font": "GothamBold",
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "BackgroundColor3": [
+                  0.27450980392156865,
+                  0.43137254901960786,
+                  0.29411764705882354
+                ],
+                "BorderSizePixel": 0
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        10
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "UIStroke",
+                  "Name": "Border",
+                  "Properties": {
+                    "Color": [
+                      0.16862745098039217,
+                      0.6901960784313725,
+                      0.8509803921568627
+                    ],
+                    "Transparency": 0.22,
+                    "Thickness": 1.2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ClassName": "Frame",
+          "Name": "ToastPanel",
+          "Properties": {
+            "AnchorPoint": {
+              "Vector2": [
+                0.5,
+                0
+              ]
+            },
+            "Position": {
+              "UDim2": [
+                [
+                  0.5,
+                  0
+                ],
+                [
+                  0,
+                  20
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  420
+                ],
+                [
+                  0,
+                  44
+                ]
+              ]
+            },
+            "BorderSizePixel": 0,
+            "BackgroundColor3": [
+              0.06274509803921569,
+              0.11372549019607843,
+              0.18823529411764706
+            ],
+            "BackgroundTransparency": 0.08
+          },
+          "Children": [
+            {
+              "ClassName": "UICorner",
+              "Name": "Corners",
+              "Properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "ClassName": "UIStroke",
+              "Name": "Border",
+              "Properties": {
+                "Color": [
+                  0.16862745098039217,
+                  0.6901960784313725,
+                  0.8509803921568627
+                ],
+                "Transparency": 0.22,
+                "Thickness": 1.2
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "Message",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      12
+                    ],
+                    [
+                      0,
+                      8
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -24
+                    ],
+                    [
+                      0,
+                      28
+                    ]
+                  ]
+                },
+                "Text": "Plant your first Daisy seed!",
+                "Font": "GothamMedium",
+                "TextSize": 13,
+                "TextColor3": [
+                  0.9098039215686274,
+                  0.9647058823529412,
+                  1
+                ],
+                "TextXAlignment": "Center",
+                "TextTruncate": "AtEnd",
+                "TextWrapped": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
