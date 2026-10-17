@@ -7,6 +7,7 @@ local Config = RS:WaitForChild("Config")
 local GameConfig = require(Config:WaitForChild("GameConfig"))
 local Flowers = require(Config:WaitForChild("FlowersConfig"))
 local Bees = require(Config:WaitForChild("BeesConfig"))
+local InventoryController = require(script.Parent.InventoryController)
 
 local Controller = {}
 local started = false
@@ -112,6 +113,7 @@ function Controller.Start()
     end
     local action = remotes:WaitForChild("Action") :: RemoteEvent
     local state = remotes:WaitForChild("State") :: RemoteEvent
+    InventoryController.Start(action, state)
     state.OnClientEvent:Connect(function(data)
         if typeof(data) == "table" then render(data) end
     end)
