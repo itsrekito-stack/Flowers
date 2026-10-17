@@ -37,6 +37,7 @@ for path in (
     "src/ServerScriptService/Services/FlowerGrowthService.luau",
     "src/StarterPlayer/StarterPlayerScripts/ClientBootstrap.client.luau",
     "src/StarterPlayer/StarterPlayerScripts/Controllers/FlowerProgressController.luau",
+    "src/StarterPlayer/StarterPlayerScripts/Controllers/BeeFlightController.luau",
 ):
     require(path)
 
@@ -91,36 +92,41 @@ if server_bootstrap.is_file() and "BeeFollowerService.Start()" not in server_boo
     errors.append("BeeFollowerService must be started by ServerBootstrap")
 
 follower_service = require("src/ServerScriptService/Services/BeeFollowerService.luau")
+client_flight = require("src/StarterPlayer/StarterPlayerScripts/Controllers/BeeFlightController.luau")
+client_bootstrap = require("src/StarterPlayer/StarterPlayerScripts/ClientBootstrap.client.luau")
 if follower_service.is_file():
     bee_source = follower_service.read_text(encoding="utf-8")
-    for expected in ("Players.PlayerAdded", "PlayerRemoving", "CharacterAdded", "CharacterRemoving", "RunService.Heartbeat", "model:PivotTo", "ServerStorage"):
+    for expected in ("Players.PlayerAdded", "PlayerRemoving", "CharacterAdded", "CharacterRemoving", "ServerStorage",
+                     "headingFromSting(clone)", 'SetAttribute("OwnerUserId"', 'SetAttribute("HeadingCorrection"'):
         if expected not in bee_source:
-            errors.append(f"Bee follower missing lifecycle/visual contract: {expected}")
-
-    # Companion should follow a character-local +Z offset, not an orbital tangent.
-    for expected in (
-        "root.CFrame:PointToWorldSpace(offset)",
-        "Config.BehindDistance",
-        "Config.SideOffset",
-        "headingFromSting(clone)",
-        'model:FindFirstChild("MainPart", true)',
-        'model:FindFirstChild("Sting", true)',
-        "CFrame.lookAt(position, focus)",
-        "follower.headingCorrection",
-        "math.exp(-Config.FollowResponsiveness * step)",
-    ):
-        if expected not in bee_source:
-            errors.append(f"Bee follow/facing regression: missing {expected}")
-    for forbidden in ("orbitPosition(", "orbitCFrame(", "Config.OrbitAngularSpeed"):
+            errors.append(f"Bee server ownership/lifecycle regression: missing {expected}")
+    for forbidden in ("RunService.Heartbeat", "orbitPosition(", "orbitCFrame("):
         if forbidden in bee_source:
-            errors.append(f"Old bee orbit code still active: {forbidden}")
+            errors.append(f"Bee server still performs per-frame cosmetic updates: {forbidden}")
+
+if client_flight.is_file():
+    flight_source = client_flight.read_text(encoding="utf-8")
+    for expected in ("RunService.RenderStepped", "model:PivotTo(frame)", "CFrame.lookAt(position, focus)",
+                     "root.CFrame:PointToWorldSpace(offset)", "Config.BehindDistance", "Config.SideOffset",
+                     "previous.Position:Lerp(position, positionAlpha)",
+                     "previous.Rotation:Lerp(desired.Rotation, rotationAlpha)",
+                     "math.exp(-Config.FollowResponsiveness * dt)", "math.exp(-Config.TurnResponsiveness * dt)",
+                     "Config.TeleportSnapDistance", "GetAttribute(\"OwnerUserId\")",
+                     "animateWings(state, frame, timeNow, phase)", "wing.CFrame = frame * state.wingOffset",
+                     "folder.ChildAdded:Connect(addCompanion)", "folder.ChildRemoved:Connect"):
+        if expected not in flight_source:
+            errors.append(f"Smooth bee animation regression: missing {expected}")
+
+if client_bootstrap.is_file() and "BeeFlightController.Start()" not in client_bootstrap.read_text(encoding="utf-8"):
+    errors.append("ClientBootstrap does not start BeeFlightController")
 
 bee_config = require("src/ReplicatedStorage/Config/BeeFollowerConfig.luau")
 if bee_config.is_file():
     config_source = bee_config.read_text(encoding="utf-8")
-    for expected in ("BehindDistance", "SideOffset", "FollowHeight", "HeadingOffsetDegrees"):
+    for expected in ("BehindDistance", "SideOffset", "FollowHeight", "HeadingOffsetDegrees",
+                     "FollowResponsiveness", "TurnResponsiveness", "WingFlapSpeed", "WingFlapDegrees"):
         if expected not in config_source:
-            errors.append(f"Bee follow config missing {expected}")
+            errors.append(f"Bee smooth flight config missing {expected}")
     if "OrbitAngularSpeed" in config_source:
         errors.append("Bee config must not use orbit angular speed")
 

@@ -1,27 +1,17 @@
 --!strict
--- Clones the artist-authored Workspace.Bee for each player and follows
--- behind their character. Server-owned so every player sees companions.
--- The original model moves to ServerStorage at runtime; it remains in
--- Workspace in Studio edit mode and is never overwritten by Rojo.
+-- Server authority owns companion creation and cleanup.
+-- Client controllers animate the replicated, anchored visual models per frame.
+-- The authored Workspace.Bee stays editable in Studio and is stored in
+-- ServerStorage only while Play is running.
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Config"):WaitForChild("BeeFollowerConfig"))
 
-type Follower = {
-    model: Model,
-    root: BasePart,
-    position: Vector3,
-    phase: number,
-    headingCorrection: number,
-}
-
 local BeeFollowerService = {}
 local started = false
-local simulationTime = 0
-local followers: { [Player]: Follower } = {}
+local followers: { [Player]: Model } = {}
 local boundPlayers: { [Player]: boolean } = {}
 local template: Model? = nil
 local companionFolder: Folder? = nil
@@ -61,23 +51,21 @@ local function getTemplate(): Model?
         warn("[Flowers/Bee] Bee Model must contain at least one BasePart.")
         return nil
     end
-
     if not source.Archivable then
         warn("[Flowers/Bee] Bee Model has Archivable=false; enable it in Properties.")
         return nil
     end
 
-    -- Hide the authoring template only during Play.
     source.Parent = ServerStorage
     template = source
     return source
 end
 
 local function removeFollower(player: Player)
-    local follower = followers[player]
+    local old = followers[player]
     followers[player] = nil
-    if follower then
-        follower.model:Destroy()
+    if old then
+        old:Destroy()
     end
 end
 
@@ -95,20 +83,8 @@ local function prepareVisual(model: Model)
     end
 end
 
--- Positive local Z is behind a Roblox character (LookVector is local -Z).
--- The target follows the player's facing direction instead of orbiting them.
-local function followPosition(root: BasePart, timeNow: number, phase: number): Vector3
-    local offset = Vector3.new(
-        Config.SideOffset,
-        Config.FollowHeight + math.sin(timeNow * Config.BobSpeed + phase) * Config.BobAmplitude,
-        Config.BehindDistance
-    )
-    return root.CFrame:PointToWorldSpace(offset)
-end
-
--- The bee's sting marks its BACK. Determine the facing direction from the
--- authored MainPart and Sting, not from an arbitrary Model pivot rotation.
--- This works even if the model was constructed sideways in Studio.
+-- Sting is the back of the artist-authored model. Correct the local
+-- model orientation once on the server, rather than guessing per frame.
 local function headingFromSting(model: Model): number
     local body = model:FindFirstChild("MainPart", true)
     local sting = model:FindFirstChild("Sting", true)
@@ -117,25 +93,12 @@ local function headingFromSting(model: Model): number
     if body and body:IsA("BasePart") and sting and sting:IsA("BasePart") then
         local localForward = model:GetPivot():VectorToObjectSpace(body.Position - sting.Position)
         if Vector3.new(localForward.X, 0, localForward.Z).Magnitude > 0.05 then
-            -- Align the sting-to-body vector with the canonical -Z LookVector.
             return math.atan2(localForward.X, -localForward.Z) + manualOffset
         end
     end
 
     warn("[Flowers/Bee] Could not infer facing from MainPart and Sting; using HeadingOffsetDegrees.")
     return manualOffset
-end
-
-local function followCFrame(
-    root: BasePart,
-    position: Vector3,
-    timeNow: number,
-    correction: number
-): CFrame
-    -- Stay level while looking horizontally toward the player.
-    local focus = Vector3.new(root.Position.X, position.Y, root.Position.Z)
-    local bank = math.rad(Config.BankDegrees) * math.sin(timeNow * Config.BankSpeed)
-    return CFrame.lookAt(position, focus) * CFrame.Angles(0, correction, bank)
 end
 
 local function spawnForCharacter(player: Player, character: Model)
@@ -150,37 +113,28 @@ local function spawnForCharacter(player: Player, character: Model)
     end
 
     local source = getTemplate()
-    if not source then
-        return
-    end
-
-    -- While waiting for HumanoidRootPart, another spawn may have been handled.
-    if followers[player] then
+    if not source or followers[player] then
         return
     end
 
     local clone = source:Clone()
-    if not clone then
-        warn("[Flowers/Bee] Could not clone the Bee template.")
-        return
-    end
-
     clone.Name = "Bee_" .. tostring(player.UserId)
     prepareVisual(clone)
 
-    local phase = (player.UserId % 31) / 31 * math.pi * 2
-    local headingCorrection = headingFromSting(clone)
-    local position = followPosition(rootCandidate, simulationTime, phase)
-    clone:PivotTo(followCFrame(rootCandidate, position, simulationTime, headingCorrection))
-    clone.Parent = ensureFolder()
+    -- These replicated attributes identify the companion to every client,
+    -- including late joiners. They do not grant any client gameplay authority.
+    clone:SetAttribute("OwnerUserId", player.UserId)
+    clone:SetAttribute("HeadingCorrection", headingFromSting(clone))
 
-    followers[player] = {
-        model = clone,
-        root = rootCandidate,
-        position = position,
-        phase = phase,
-        headingCorrection = headingCorrection,
-    }
+    local pos = rootCandidate.CFrame:PointToWorldSpace(
+        Vector3.new(Config.SideOffset, Config.FollowHeight, Config.BehindDistance)
+    )
+    local focus = Vector3.new(rootCandidate.Position.X, pos.Y, rootCandidate.Position.Z)
+    clone:PivotTo(
+        CFrame.lookAt(pos, focus) * CFrame.Angles(0, clone:GetAttribute("HeadingCorrection") :: number, 0)
+    )
+    clone.Parent = ensureFolder()
+    followers[player] = clone
 end
 
 local function onCharacter(player: Player, character: Model)
@@ -199,31 +153,9 @@ local function bindPlayer(player: Player)
     player.CharacterRemoving:Connect(function()
         removeFollower(player)
     end)
-
     if player.Character then
         onCharacter(player, player.Character)
     end
-end
-
-local function updateFollower(player: Player, follower: Follower, timeNow: number, step: number)
-    if player.Parent ~= Players or not follower.root:IsDescendantOf(workspace)
-        or not follower.model:IsDescendantOf(workspace) then
-        removeFollower(player)
-        return
-    end
-
-    local target = followPosition(follower.root, timeNow, follower.phase)
-
-    if (target - follower.position).Magnitude > Config.TeleportSnapDistance then
-        follower.position = target
-    else
-        local alpha = 1 - math.exp(-Config.FollowResponsiveness * step)
-        follower.position = follower.position:Lerp(target, alpha)
-    end
-
-    follower.model:PivotTo(
-        followCFrame(follower.root, follower.position, timeNow, follower.headingCorrection)
-    )
 end
 
 function BeeFollowerService.Start()
@@ -245,7 +177,7 @@ function BeeFollowerService.Start()
         bindPlayer(player)
     end
 
-    -- Also handle an authored Bee model inserted after Play begins.
+    -- A Bee model added after Play can become the template without restart.
     workspace.ChildAdded:Connect(function(child)
         if child.Name ~= Config.TemplateName or not child:IsA("Model") then
             return
@@ -265,22 +197,6 @@ function BeeFollowerService.Start()
     task.delay(8, function()
         if not template then
             warn("[Flowers/Bee] No Workspace.Bee Model found. Add your editable Bee Model to Workspace.")
-        end
-    end)
-
-    local accumulator = 0
-    RunService.Heartbeat:Connect(function(dt)
-        accumulator += dt
-        if accumulator < Config.UpdateInterval then
-            return
-        end
-
-        local step = accumulator
-        accumulator = 0
-        simulationTime += step
-
-        for player, follower in followers do
-            updateFollower(player, follower, simulationTime, step)
         end
     end)
 end

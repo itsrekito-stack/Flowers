@@ -1,25 +1,32 @@
 --!strict
--- Companion follows behind the character, with its FRONT turned toward the player.
+-- Shared visual settings; only the server spawns/removes companions.
 local BeeFollowerConfig = {
     TemplateName = "Bee",
     CompanionsFolderName = "BeeCompanions",
 
-    -- Roblox character local +Z points behind their back.
     BehindDistance = 3.2,
     SideOffset = -1.5,
     FollowHeight = 2.0,
 
-    BobAmplitude = 0.22,
-    BobSpeed = 2.5,
-    FollowResponsiveness = 10,
+    -- Smoothed position and rotation; higher values follow more quickly.
+    FollowResponsiveness = 7.5,
+    TurnResponsiveness = 6.0,
     TeleportSnapDistance = 35,
-    BankDegrees = 4,
-    BankSpeed = 2,
 
-    -- Only needed if the authored Sting/MainPart positions don't match
-    -- the desired visual front direction (try 180 for a reversed model).
+    -- Gentle idle flight and banking.
+    BobAmplitude = 0.20,
+    BobSpeed = 2.4,
+    SwayAmplitude = 0.11,
+    SwaySpeed = 1.15,
+    BankDegrees = 3.5,
+    BankSpeed = 1.6,
+
+    -- Optional flutter of the authored BasePart named "Wings".
+    WingFlapDegrees = 14,
+    WingFlapSpeed = 15,
+
+    -- Additional correction if MainPart/Sting do not indicate the front.
     HeadingOffsetDegrees = 0,
-    UpdateInterval = 1 / 30,
 }
 
 return table.freeze(BeeFollowerConfig)

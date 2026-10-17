@@ -15,8 +15,10 @@
 
 ## Bee Companion (first visual pet)
 
-- `BeeFollowerService` runs on the server, creates exactly one `Bee_<UserId>` per character in `Workspace.BeeCompanions`, and smoothly follows a character-local behind/side offset on a throttled Heartbeat. The bee faces toward the character; physical facing comes from the authored Sting-to-MainPart vector.
-- `BeeFollowerConfig` is the only place for orbit/smoothing/bobbing numbers.
+- `BeeFollowerService` runs on the server, creates exactly one anchored `Bee_<UserId>` per character in `Workspace.BeeCompanions`, tags it with owner and authored Sting-to-MainPart facing correction, and removes it on respawn/leave.
+- `BeeFlightController` runs on each client using RenderStepped: computes the character-relative behind/side follow target, exponentially smooths position **and rotation** (frame-rate independent), snaps after teleports, bobs/banks and flutters authored Wings if they are a BasePart. Client PivotTo changes are cosmetic and never sent as gameplay state.
+- This avoids network-stutter from 30 Hz server pose replication, while keeping authoritative companion lifecycle on the server.
+- `BeeFollowerConfig` is the only place for follow/smoothing/bobbing/flapping numbers.
 - The artist-authored `Workspace.Bee` template is moved to `ServerStorage` **at runtime only** so it is not visible as an extra stationary bee.
 - No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.
 - Manual Studio world assets are not yet stored in Git. Do not assume fresh `rojo build` includes a bee.
