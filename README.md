@@ -30,8 +30,7 @@ Install **Rojo CLI** and the **Rojo Studio plugin** before running `serve.ps1`. 
 
 The game uses `ReplicatedStorage/Models` for the three bees and flowers.
 At **Play start**, `FlowerModelService` reads your Studio-authored
-`Workspace.Flower` Model (including its `Circle`, `Circle.001`,
-`Circle2` meshes), keeps the original safely in `ServerStorage`,
+`Workspace.Flower` Model (FlowerTop, InnerCircles and Стебель meshes), keeps the original safely in `ServerStorage`,
 and creates a complete **`ReplicatedStorage.Flower`** template copy.
 Daisy, Tulip and Sunflower in `ReplicatedStorage.Models.Flowers` are full
 clones of that template (including pivot, PrimaryPart and hierarchy), recolored from
@@ -88,56 +87,54 @@ Studio accesses the same store as that experience; use a separate test experienc
 These Studio checks remain a manual gate; automated tests do not claim them.
 The 1/n entries remain relative roll weights, not independent probabilities.
 
-## Starter content catalogs
+## Source-controlled world and catalogs
 
-The game now contains **three bees and three flowers** in
-`ReplicatedStorage.Models.Bees` and `ReplicatedStorage.Models.Flowers`.
-Each template is an **editable Roblox Model made of Parts**, authored as a
-source-controlled Rojo `.model.json` file.
+The authored scene from `1.rbxl` is now included under `src/Workspace`:
 
-| Category | ID | Display name | Model | Rarity |
-| --- | --- | --- | --- | --- |
-| Bee | `worker_bee` | Worker Bee | `WorkerBee` | 1/2 |
-| Bee | `bumble_bee` | Bumble Bee | `BumbleBee` | 1/10 |
-| Bee | `crystal_bee` | Crystal Bee | `CrystalBee` | 1/50 |
-| Flower | `daisy` | Daisy | `Daisy` | 1/2 |
-| Flower | `tulip` | Tulip | `Tulip` | 1/10 |
-| Flower | `sunflower` | Sunflower | `Sunflower` | 1/50 |
+- `Garden.model.json`: Dirt and Slots/Slot1…Slot9, at the original positions/rotations.
+- `Flower.model.json`: FlowerTop, InnerCircles and Стебель MeshParts with the original
+  mesh IDs, dimensions, colors, model scale and pivot.
+- `Bee.model.json`: the authored Sting, MainPart and Wings companion template.
+- `Baseplate.model.json` and `SpawnLocation.model.json`: original ground/spawn and textures.
 
-Shared definitions live in `Config/BeesConfig.luau` and
-`Config/FlowersConfig.luau`. The three **temporary flower models now share
-identical geometry** and differ only in colors: Daisy = coral red, Tulip =
-lavender-purple, Sunflower = golden yellow. Their palettes live alongside
-their IDs in `FlowersConfig.luau`. Rarity is catalog metadata for future
-roll mechanics; **it does not implement rolling or give items**. Current
-bee-follower uses `worker_bee` by default if no custom `Workspace.Bee`
-exists. Existing `Workspace.Bee` takes precedence and remains editable.
+All objects remain individually editable. During Play, Flower is copied to
+`ReplicatedStorage.Flower` and the three catalog flowers become palette variants.
+The original Flower and Bee are kept in ServerStorage during Play; they remain
+in their authored Workspace locations after Stop. Growth is relative to the
+original flower scale, including restored plants. InnerCircles uses Center color.
 
-Important: **GitHub cannot read an unsynced model out of your running Studio**.
-The committed flower `.model.json` assets are **fallback prototypes**;
-their exact MeshPart geometry cannot be exported from Studio through GitHub.
-**During Play with `Workspace.Flower` present, the source-controlled
-catalog Models are temporarily re-skinned with that original model's
-cloned geometry**. To make custom MeshParts permanent in Git, export
-the authored model from Studio or import future Blender models into
-the source project. Keep the ModelNames/IDs stable. The existing `Workspace.Flower`
-remains the growing demonstration flower, and is not replaced.
+| Category | IDs | Models |
+| --- | --- | --- |
+| Flowers | daisy, tulip, sunflower | Daisy, Tulip, Sunflower |
+| Bees | worker_bee, bumble_bee, crystal_bee | WorkerBee, BumbleBee, CrystalBee |
 
-## Bee companion (authored 3D asset)
+Catalog definitions remain in `ReplicatedStorage/Config`. The source-controlled
+WorkerBee is still available if the custom Workspace.Bee is absent. Generic
+flower catalog parts are a defensive fallback only; the clean build includes
+Workspace.Flower and uses its real meshes at startup.
 
-Place your existing **Model** called `Bee` directly in `Workspace` in Studio, with `MainPart`, `Sting`, `Wings` inside. The runtime server service moves that authoring model to `ServerStorage` while Play is running. If that model does not exist, it clones the source-controlled `ReplicatedStorage.Models.Bees.WorkerBee` instead. In either case it creates one Bee per player in `Workspace.BeeCompanions`. When you stop Play, the original Bee is still in its Studio edit position.
+### Clean build check
 
-- Automatically spawns when a character loads and respawns after death; cleans up when the player leaves.
-- Flies **behind the character** (slightly to the side), gently bobs and banks, and faces **toward the player** rather than circling around them. Every client renders smooth motion and turns per frame, independent of server/network update rate.
-- Collision, touch, query and shadow are disabled on cloned visual parts; their authored relative positions are preserved.
-- The server owns companion spawn/respawn/cleanup; every client animates the replicated models using RenderStepped. Other players see smooth flight without sending position updates over remotes.
-- If `Wings` is a BasePart, it gets a light flutter using its saved authored offset; no new rig or animations are needed.
-- Tune back/side distance, altitude, smoothing, bob, bank and wing flutter in `src/ReplicatedStorage/Config/BeeFollowerConfig.luau`.
-- Orientation is inferred from the authored `MainPart` and `Sting` positions (sting = rear), even when the Model pivot points sideways. If that geometry is ambiguous, the `HeadingOffsetDegrees` setting is a manual override.
+Run `rojo build default.project.json -o Flowers.rbxl` (or `tools/build.ps1`),
+open that file in Studio, and press Play. No manual object insertion is needed.
+Check spawn/ground, nine slots, the original flower geometry and all three color
+variants, the following bee, planting/growth/harvest/roll, and returning-player
+restoration. Stop Play and confirm the authored objects retain their positions.
+To check the fallback, temporarily move Bee out of Workspace in a test copy;
+WorkerBee should appear without a missing-model warning. Mesh loading/permissions
+and real gameplay still require Studio verification.
 
-**The custom Bee is still Studio-only.** Rojo preserves it during live sync.
-A clean build already includes the WorkerBee fallback and does not need a manually
-inserted bee. Keep the Studio place backed up to preserve your custom model.
+### Editing and backups
+
+The uploaded place is the original backup. An independent five-root model
+snapshot is also committed at `tools/fixtures/authored_world.rbxmx` for conversion
+verification; it is not mapped into the runtime. The test avatar Rig, editor
+Camera, and place scripts were not imported over the current repository code.
+
+Rojo preserves unknown top-level Workspace objects. Synced world properties now
+come from the JSON sources; later Studio-only edits must be exported/synced back
+before another sync, just like authored UI. Existing matching object names and
+classes are retained; no runtime code deletes/recreates Garden or its slots.
 
 ## Folders
 
@@ -155,46 +152,17 @@ Flowers/
 └─ roflow.project.json
 ```
 
-## Important
-
-Rojo preserves manually placed Workspace objects during live sync. Those instances **are not exported to GitHub automatically**. A `rojo build` without the actual 3D flower scene will not contain the flower model. Back up the original place and export models to source before treating a built `.rbxl` as the complete game.
-
 ## QA
 
-Run `python tools/qa.py` for project contracts and persistence behavioral tests.
-The behavioral suite executes the production DataService/ProfileSchema modules
-against a fake DataStore using Lua 5.4 (CLI or shared library). If Lua is missing
-locally, QA explicitly reports a test skip; CI installs it and requires the tests.
-`.\tools\qa.ps1` additionally builds with Rojo when installed. CI also builds
-the place. **No automated Studio Play test has been claimed.**
+Run `python tools/qa.py`. It checks existing UI/remote contracts, 35 persistence
+assertions and the world hierarchy/properties against the independent snapshot.
+With Rojo installed it also builds an empty-source place and compares all 24
+world instances / 485 exported properties to the original. With Lune 0.11.0 it
+executes 39 model-template assertions and compiles all shipped Luau scripts.
+Missing local tools are explicitly reported as SKIP; CI installs and requires
+Lua 5.4, Rojo 7.7.1 and Lune 0.11.0. CI also builds binary FlowersQA.rbxl.
+
+Headless model tests do not emulate Roblox physics, network asset loading or
+player sessions. Studio clean-build playtesting remains the stage 2 acceptance gate.
 
 See [Architecture](docs/ARCHITECTURE.md).
-
-
-### Authored flower template
-
-During Play, `Workspace.Flower` is duplicated into `ReplicatedStorage.Flower`.
-All three planted flower types use that geometry with their configured palettes.
-`InnerCircle` explicitly uses the dark Center palette. The untouched original
-is parked in ServerStorage during Play and returns on Stop. Template copying
-does not export the Studio asset into Git; clean-build world export remains stage 2.
-If an unrelated `ReplicatedStorage.Flower` already exists, copying is skipped with
-a warning rather than deleting the authored object.
-
-Manual check: Play with the authored Flower, inspect the template and three catalog
-models, plant each type, verify geometry/center colors, then Stop and verify the
-original Workspace model remains unchanged.
-
-## Stage 2 status: authored world export pending
-
-The repository has no authored Garden/Slots or Workspace.Flower asset yet.
-The runtime template copy does not export Studio models into Git. A Rojo build
-can succeed while lacking the authored map, ground and spawn. Do not treat a
-successful build as a verified playable standalone world.
-
-To finish this stage without changing placement/pivots, provide the current
-Studio place as .rbxl or .rbxlx (File → Save to File, after stopping Play).
-This preserves Garden, Flower and the surrounding spawn/ground in one snapshot.
-Individual Garden and Flower .rbxm/.rbxmx exports can also preserve the models,
-but the ground/spawn still need to be accounted for. No replacement world assets
-will be fabricated from screenshots.

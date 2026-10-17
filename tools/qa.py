@@ -408,12 +408,50 @@ try:
 except Exception as exc:
     errors.append(f"Persistence behavioral tests failed: {exc}")
 
+# World conversion checks compare against an independent rbx-dom export of 1.rbxl.
+try:
+    from check_world import run as check_world
+    check_world()
+    workspace_tree = manifest['tree']['Workspace']
+    for name in ('Garden', 'Flower', 'Bee', 'Baseplate', 'SpawnLocation'):
+        assert workspace_tree[name]['$path'] == f'src/Workspace/{name}.model.json'
+        assert workspace_tree[name]['$ignoreUnknownInstances'] is True
+    assert 'local baseScale = source:GetScale()' in game_source
+    assert 'clone:SetAttribute("BaseScale", baseScale)' in game_source
+    assert 'plant:ScaleTo(baseScale * (1 +' in game_source
+    assert 'name == "innercircles"' in model_service.read_text(encoding='utf-8')
+    import os
+    import shutil
+    import subprocess
+    import tempfile
+    rojo = shutil.which('rojo')
+    lune = shutil.which('lune')
+    if rojo:
+        with tempfile.TemporaryDirectory(prefix='flowers-world-') as temp:
+            built = Path(temp) / 'Flowers.rbxlx'
+            subprocess.run([rojo, 'build', 'default.project.json', '-o', str(built)],
+                           cwd=ROOT, check=True)
+            check_world(built)
+            if lune:
+                subprocess.run([lune, 'run', 'tools/world_runtime_spec.luau', str(built)],
+                               cwd=ROOT, check=True)
+            elif os.environ.get('CI'):
+                raise RuntimeError('CI requires Lune for world model tests')
+            else:
+                print('WORLD RUNTIME TESTS: SKIP (Lune unavailable)')
+    elif os.environ.get('CI'):
+        raise RuntimeError('CI requires Rojo for clean-world verification')
+    else:
+        print('CLEAN WORLD BUILD: SKIP (Rojo unavailable)')
+except Exception as exc:
+    errors.append(f'Authored world regression: {exc}')
+
 if errors:
     print("FLOWERS QA FAILED:")
     for error in errors:
         print(" -", error)
     sys.exit(1)
 
-print("FLOWERS QA: PASS (catalogs, slot CFrame, inventory, authored UI, RoFlow, persistence)")
-print("NOTE: Rojo build and Roblox Studio playtest must still be run.")
+print("FLOWERS QA: PASS (catalogs, slot CFrame, inventory, authored UI, RoFlow, persistence, authored world)")
+print("NOTE: Roblox Studio playtest is a manual gate; unavailable local tools are reported as SKIP.")
 
