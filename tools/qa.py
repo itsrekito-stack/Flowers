@@ -138,6 +138,65 @@ if bee_config.is_file():
     if "OrbitAngularSpeed" in config_source:
         errors.append("Bee config must not use orbit angular speed")
 
+# Flower prototypes use one shared geometry with three config-driven palettes.
+# Keep all art identical except RGB until Blender replacements are imported.
+import re
+
+registry_source = (ROOT / "src/ReplicatedStorage/Config/FlowersConfig.luau").read_text(encoding="utf-8")
+flower_geometry = None
+observed_palettes = set()
+for flower_id, model_name in (
+    ("daisy", "Daisy"), ("tulip", "Tulip"), ("sunflower", "Sunflower")
+):
+    model = read_json(f"src/ReplicatedStorage/Models/Flowers/{model_name}.model.json")
+    parts = model.get("Children", [])
+    current_geometry = [
+        (p.get("Name"), p.get("ClassName"), p.get("Properties", {}).get("Shape"),
+         p.get("Properties", {}).get("Size"), p.get("Properties", {}).get("CFrame"))
+        for p in parts
+    ]
+    if flower_geometry is None:
+        flower_geometry = current_geometry
+    elif current_geometry != flower_geometry:
+        errors.append(f"{model_name} differs in geometry from the shared temporary flower shape")
+
+    match = re.search(
+        rf"\\b{flower_id}\\s*=\\s*\\{{(?P<definition>.*?)\\n\\s*\\}},",
+        registry_source, re.DOTALL
+    )
+    if not match:
+        errors.append(f"FlowersConfig missing palette definition for {flower_id}")
+        continue
+    colors = {
+        color_name: tuple(int(channel) for channel in channels)
+        for color_name, *channels in re.findall(
+            r"(Petals|Center|Stem|Leaf)\\s*=\\s*Color3\\.fromRGB\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)",
+            match.group("definition")
+        )
+    }
+    if set(colors) != {"Petals", "Center", "Stem", "Leaf"}:
+        errors.append(f"{flower_id}: palette must contain Petals, Center, Stem and Leaf")
+        continue
+    observed_palettes.add(colors["Petals"])
+    for p in parts:
+        part_name = p.get("Name", "")
+        expected_role = (
+            "Petals" if part_name.startswith("Petal") else
+            "Center" if part_name == "Center" else
+            "Stem" if part_name == "Stem" else
+            "Leaf" if part_name in ("LeafLeft", "LeafRight") else None
+        )
+        if expected_role is None:
+            continue
+        actual = p.get("Properties", {}).get("Color", [])
+        expected = colors[expected_role]
+        if len(actual) != 3 or any(
+            abs(a - ch / 255) > 1e-6 for a, ch in zip(actual, expected)
+        ):
+            errors.append(f"{model_name}/{part_name} does not match {flower_id}.{expected_role}")
+if len(observed_palettes) != 3:
+    errors.append("All 3 flower petal palettes must be distinct")
+
 # Catalog/model contract: exactly three editable source-controlled Roblox models per category.
 expected_models = {
     "Bees": ["WorkerBee", "BumbleBee", "CrystalBee"],

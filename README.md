@@ -47,14 +47,19 @@ source-controlled Rojo `.model.json` file.
 | Flower | `sunflower` | Sunflower | `Sunflower` | 1/50 |
 
 Shared definitions live in `Config/BeesConfig.luau` and
-`Config/FlowersConfig.luau`. Rarity is catalog metadata for future
+`Config/FlowersConfig.luau`. The three **temporary flower models now share
+identical geometry** and differ only in colors: Daisy = coral red, Tulip =
+lavender-purple, Sunflower = golden yellow. Their palettes live alongside
+their IDs in `FlowersConfig.luau`. Rarity is catalog metadata for future
 roll mechanics; **it does not implement rolling or give items**. Current
 bee-follower uses `worker_bee` by default if no custom `Workspace.Bee`
 exists. Existing `Workspace.Bee` takes precedence and remains editable.
 
 Important: **GitHub cannot read an unsynced model out of your running Studio**.
-These are six new source-controlled models based on Roblox Parts, not exact
-exports of your manually created bee/flower. The existing `Workspace.Flower`
+These are six source-controlled models based on Roblox Parts, not exact
+exports of your manually created bee/flower. The three catalog flowers are
+temporary identical-shape color variants and can later be replaced with
+separate Blender models without changing their ModelName or ID. The existing `Workspace.Flower`
 remains the growing demonstration flower, and is not replaced.
 
 ## Bee companion (authored 3D asset)

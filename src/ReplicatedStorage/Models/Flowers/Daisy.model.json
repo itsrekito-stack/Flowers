@@ -12,9 +12,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.23,
-          0.64,
-          0.3
+          0.15294117647058825,
+          0.615686274509804,
+          0.27058823529411763
         ],
         "Shape": "Cylinder",
         "Size": [
@@ -49,9 +49,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.1,
-          0.43,
-          0.21
+          0.12156862745098039,
+          0.4470588235294118,
+          0.19215686274509805
         ],
         "Shape": "Ball",
         "Size": [
@@ -86,9 +86,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.23,
-          0.64,
-          0.3
+          0.12156862745098039,
+          0.4470588235294118,
+          0.19215686274509805
         ],
         "Shape": "Ball",
         "Size": [
@@ -123,9 +123,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          1,
-          0.82,
-          0.12
+          0.5843137254901961,
+          0.18823529411764706,
+          0.2235294117647059
         ],
         "Shape": "Ball",
         "Size": [
@@ -160,9 +160,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -197,9 +197,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -234,9 +234,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -271,9 +271,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -308,9 +308,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -345,9 +345,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -382,9 +382,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [
@@ -419,9 +419,9 @@
         "CastShadow": false,
         "Material": "SmoothPlastic",
         "Color": [
-          0.97,
-          0.98,
-          1
+          1,
+          0.3411764705882353,
+          0.3568627450980392
         ],
         "Shape": "Ball",
         "Size": [

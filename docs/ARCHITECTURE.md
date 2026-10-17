@@ -17,6 +17,7 @@
 
 - `src/ReplicatedStorage/Config/BeesConfig.luau` defines 3 bee types and starter ID; `FlowersConfig.luau` defines 3 flower types. These are metadata, not reward logic.
 - `src/ReplicatedStorage/Models/Bees/*.model.json` and `Models/Flowers/*.model.json` contain 6 real editable Roblox part models, not thumbnails or scripts.
+- **Temporary flower art**: the three source-controlled flower models have identical part geometry (copied from Daisy), with distinct petal/center colors. Palettes are stored in `FlowersConfig.ById[flowerId].Palette`. When Blender models arrive, replace the corresponding Rojo model assets without changing catalog ID or ModelName. No active scripts repaint custom MeshParts automatically.
 - The first live companion is the catalog's WorkerBee except when an authored `Workspace.Bee` exists. The original Studio bee always takes precedence to avoid replacing existing art.
 - `Workspace.Flower` is still the shared growing demo; no automatic planting/inventory ownership is claimed by this change.
 
