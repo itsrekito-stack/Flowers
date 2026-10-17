@@ -1,4 +1,4 @@
-# Flowers — Architecture v0.1
+# Flowers — Architecture (1.0 stage 1)
 
 ## Source of truth
 - `main` is authoritative for synced source, not the last state of Studio.
@@ -43,7 +43,7 @@
   command cooldowns; the client cannot mint inventory items. It
   rejects additional arguments and rate-limits actions. No client-supplied
   cost, reward, ID or quantity is trusted.
-- `FlowerGameRemotes/State` only replicates filtered per-player session data.
+- `FlowerGameRemotes/State` only replicates filtered per-player gameplay data.
 - `SimpleGameController` binds `FlowersGame.model.json`; 
   `InventoryController` binds `FlowersInventory.model.json`. Inventory
   uses six authored Roblox cards and category tabs, is hidden on entry, and
@@ -54,22 +54,73 @@
   cleans up at most one growing flower per player under `FlowersGameWorld`.
 - `BeeFollowerService.Refresh` switches the existing follower's model only
   when the server unlocks a rarer bee.
-- Current player progression is **session-only**, not saved. The old shared
-  `Workspace.Flower` growth service no longer runs; all XP belongs to real planted flowers.
+- Player progression is persisted through `DataService`; the old shared
+  `Workspace.Flower` growth service remains disabled. All XP belongs to player-owned plants.
 
 ## Important limitations before expanding
-- The flower's progression is **shared per server**, not persisted and not tied to a player profile. Do not represent it as save-enabled.
 - The StarterGui BillboardGui is source-controlled; the manually placed Workspace flower/garden **is not yet**. Export authored world assets into source before using `rojo build` as a complete playable place.
 - Never change DataStore names/schema without migration once persistence is added.
-- Add remote type/rate/ownership validation before accepting any client mutations.
+- Preserve the existing remote type/rate/ownership validation for every mutation.
 - RoFlow UI Studio can edit the **Game HUD** ScreenGui and the **Flower HUD** ScreenGui; the overhead BillboardGui remains editable in Studio/source.
 
-## Next stages
-1. Sync with an empty test place; validate the exact model name `Workspace.Flower`.
-2. Export/author flower and garden world models to source while preserving pivots and placement.
-3. Add per-player plots/progression and durable data lifecycle.
-4. Add authored HUD, responsive UI tests and service-level gameplay tests.
+## Durable player profiles — stage 1
 
+- `ProfileSchema` owns serialization validation and defaults. `DataService` owns
+  DataStore retries, session leases and serialized writes. `SimpleGameService`
+  remains the authority for all gameplay; it captures explicit snapshots and
+  owns join/leave/autosave/shutdown orchestration. No Instance/CFrame/cooldown is saved.
+- Stable store: `Flowers_PlayerData`, default scope, key `Player_<UserId>`.
+- Schema v1: `schemaVersion`, `Honey`, `Seeds` (ID → nonnegative integer), `Bees`
+  (ID → boolean), `Selected`, `BeeId`, `Planted` (false or `{Id, Level, XP, Seconds}`),
+  and optional `session` (`token`, `expires`) used only for ownership fencing.
+- No durable pre-v1 format exists. Missing key gets defaults from GameConfig and
+  starter catalog IDs. Unsupported versions/unknown fields/invalid values are
+  rejected into a temporary unsaved session. Future fields require an explicit
+  schema migration; never fix invalid saved data by writing starter defaults.
+- Load atomically acquires a 180-second lease with UpdateAsync. Each acquisition
+  uses a unique GUID. Callbacks are side-effect-free and tolerate re-execution.
+  All requests use pcall, initial attempt + 3 retries, pauses of 2/4/6 seconds.
+  A lock held elsewhere is retried; if still occupied, gameplay is temporary.
+- Autosave every 60 seconds renews the lease. Writes verify token and expiry;
+  stale servers cannot overwrite the latest owner. Loss of ownership disables
+  future writes and uses the existing HUD message to mark the session temporary.
+  Transient write failure keeps the handle retryable and the old durable data.
+- A per-handle busy flag serializes requests. Overlapping autosaves are skipped;
+  a final save marks the handle closing, waits for an in-flight write, then
+  stores its final snapshot and releases the lock. Closed handles never write.
+- Joining is asynchronous and deduplicated. No gameplay profile/plot is exposed
+  until loading resolves. If the player leaves while loading, release the acquired
+  record unchanged. Both startup players and later arrivals use the same path.
+- Leave removes the gameplay profile before yielding, snapshots before destroying
+  the runtime plant, frees runtime resources, and saves the frozen snapshot.
+  BindToClose freezes actions/growth, starts final saves in parallel, and waits
+  for saves and in-flight loads up to 25 seconds. Roblox shutdown/API limits mean
+  an outage or hard kill cannot guarantee the last unsaved changes.
+- Restore uses the same model-placement helper as planting, without proximity
+  checks or charging seeds. Saved XP, level and growth ticks restore attributes
+  and size; selected seed may differ from the planted ID. Missing model keeps
+  `PendingPlant` serialized and blocks replacement planting to prevent data loss.
+  The equipped bee attribute is restored and the existing follower refreshed.
+
+### Stage 1 assumptions
+
+- Persist `Seconds` from the outset: visual size depends on elapsed growth ticks,
+  not only level/XP. No offline growth is added. Existing timing/balance stays.
+- Slot number/position is not persistent; the player gets a current available plot.
+- Starter seed count moves from the old literal 1 to `GameConfig.StartingSeeds = 1`;
+  starter IDs remain in their existing catalogs. Prices/rewards are unchanged.
+- A temporary profile remains temporary for its whole visit; reconnect after the
+  API recovers. Runtime progress cannot be safely merged with an unknown save.
+- No authored Studio objects, GUI models or RemoteEvent command formats change.
+- Static lifecycle contracts plus executable fake-DataStore tests cover storage
+  behavior, not Roblox rendering, shutdown timing or real API access. Studio
+  rejoin/respawn/2-player checks in README are mandatory before acceptance.
+
+## Next stages (require confirmation)
+2. Export Garden and authored Flower without changing placement/pivots.
+3. Multiplayer slot exhaustion, lifecycle cleanup and negative command tests.
+4. Existing HUD onboarding, numeric balance and viewport checks.
+5. Full manual release checklist, CHANGELOG and v1.0.0 tag.
 
 ## Authored flower template correction
 
