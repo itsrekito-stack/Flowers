@@ -27,11 +27,28 @@ Install **Rojo CLI** and the **Rojo Studio plugin** before running `serve.ps1`. 
 5. Spend Honey on **ROLL FLOWER** (8) or **ROLL BEE** (18).
    A rare bee equips automatically and grows flowers faster.
 
-The game uses `ReplicatedStorage/Models` for the 3 bee and 3 flower
-templates. UI is authored in `StarterGui/FlowersGame.model.json` and
+The game uses `ReplicatedStorage/Models` for the three bees and flowers.
+At **Play start**, `FlowerModelService` reads your Studio-authored
+`Workspace.Flower` Model (including its `Circle`, `Circle.001`,
+`Circle2` meshes), keeps the original safely in `ServerStorage`,
+and replaces the temporary children of the three ReplicatedStorage
+flower models with **exact clones of your geometry**, recolored from
+`FlowersConfig.Palette`. Those live Roblox models are then used for
+planting. The authored source appears in Workspace again after stopping Play.
+
+The automatically assigned garden plots are read exclusively from
+`Workspace.Garden.Slots.Slot1`, `Slot2`, etc., sorted by slot number.
+One occupied slot is reserved per player in this MVP. A model is
+positioned with its lowest bounds exactly on the slot's top surface;
+the slots themselves are never moved or replaced.
+
+UI is authored in `StarterGui/FlowersGame.model.json` and
 editable in RoFlow **Game HUD**. Garden slots in `Workspace.Garden.Slots`
 are used when available; otherwise a small temporary field is generated
-near SpawnLocation. No authored Garden/Flower/Bee instance is deleted.
+near SpawnLocation. No authored Garden/Flower/Bee instance is permanently deleted. The old
+`Workspace.Flower` demo growth is disabled so it no longer duplicates
+plants or XP bars. The overhead XP bar follows the local player's
+planted flower; the redundant lower-left bar is disabled.
 
 Important MVP limitation: **Honey, seeds, unlocked bees and planted flowers
 are session-only**, reset on rejoin and server restart. No DataStore is
@@ -76,10 +93,13 @@ bee-follower uses `worker_bee` by default if no custom `Workspace.Bee`
 exists. Existing `Workspace.Bee` takes precedence and remains editable.
 
 Important: **GitHub cannot read an unsynced model out of your running Studio**.
-These are six source-controlled models based on Roblox Parts, not exact
-exports of your manually created bee/flower. The three catalog flowers are
-temporary identical-shape color variants and can later be replaced with
-separate Blender models without changing their ModelName or ID. The existing `Workspace.Flower`
+The committed flower `.model.json` assets are **fallback prototypes**;
+their exact MeshPart geometry cannot be exported from Studio through GitHub.
+**During Play with `Workspace.Flower` present, the source-controlled
+catalog Models are temporarily re-skinned with that original model's
+cloned geometry**. To make custom MeshParts permanent in Git, export
+the authored model from Studio or import future Blender models into
+the source project. Keep the ModelNames/IDs stable. The existing `Workspace.Flower`
 remains the growing demonstration flower, and is not replaced.
 
 ## Bee companion (authored 3D asset)
