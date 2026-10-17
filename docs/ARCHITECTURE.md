@@ -29,7 +29,8 @@
 - `BeeFollowerConfig` is the only place for follow/smoothing/bobbing/flapping numbers.
 - The artist-authored `Workspace.Bee` template is moved to `ServerStorage` **at runtime only** so it is not visible as an extra stationary bee.
 - No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.
-- Manual Studio world assets are not yet stored in Git. Do not assume fresh `rojo build` includes a bee.
+- Manual Studio world assets are not yet stored in Git. A fresh `rojo build`
+  includes WorkerBee as the fallback; only the custom authored bee is Studio-only.
 
 ## Simple Game MVP
 
@@ -135,3 +136,21 @@ Assumption: copying happens during Play, since the Studio-only source cannot be
 read/exported by GitHub. The template path must be vacant; an existing unrelated
 ReplicatedStorage.Flower is preserved and reported. Source-controlled world export
 and the remaining release stages are not included in this correction.
+
+## Stage 2 checkpoint — source-controlled world
+
+Audited main 4eff8623: Workspace has only class/preservation configuration in
+default.project.json. No Garden or authored Flower export exists in source.
+Exact slot CFrames, Model pivots and mesh identities cannot be recovered from
+this repository or screenshots. Export is blocked pending the actual Studio
+place/model files; no replacement layout has been invented.
+
+WorkerBee is already shipped and selected by getTemplate when Workspace.Bee
+is absent. Fixed the delayed missing-model diagnostic to check that same
+resolver, instead of the cache that stores only the custom authored Bee.
+QA now guards this fallback regression.
+
+Assumption: use a stopped-Play place export to preserve source objects, not
+runtime clones or occupied slots. A full place also provides ground and spawn
+needed to assess clean-build playability. Stage 2 is not complete and Studio
+clean-build verification remains pending.

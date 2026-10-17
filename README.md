@@ -135,7 +135,9 @@ Place your existing **Model** called `Bee` directly in `Workspace` in Studio, wi
 - Tune back/side distance, altitude, smoothing, bob, bank and wing flutter in `src/ReplicatedStorage/Config/BeeFollowerConfig.luau`.
 - Orientation is inferred from the authored `MainPart` and `Sting` positions (sting = rear), even when the Model pivot points sideways. If that geometry is ambiguous, the `HeadingOffsetDegrees` setting is a manual override.
 
-**The 3D model is still Studio-only.** Rojo preserves it during live sync; this repo cannot export an existing Workspace model automatically. Keep the Studio place backed up. A fresh `rojo build` without the model cannot display the bee until you insert one.
+**The custom Bee is still Studio-only.** Rojo preserves it during live sync.
+A clean build already includes the WorkerBee fallback and does not need a manually
+inserted bee. Keep the Studio place backed up to preserve your custom model.
 
 ## Folders
 
@@ -182,3 +184,17 @@ a warning rather than deleting the authored object.
 Manual check: Play with the authored Flower, inspect the template and three catalog
 models, plant each type, verify geometry/center colors, then Stop and verify the
 original Workspace model remains unchanged.
+
+## Stage 2 status: authored world export pending
+
+The repository has no authored Garden/Slots or Workspace.Flower asset yet.
+The runtime template copy does not export Studio models into Git. A Rojo build
+can succeed while lacking the authored map, ground and spawn. Do not treat a
+successful build as a verified playable standalone world.
+
+To finish this stage without changing placement/pivots, provide the current
+Studio place as .rbxl or .rbxlx (File → Save to File, after stopping Play).
+This preserves Garden, Flower and the surrounding spawn/ground in one snapshot.
+Individual Garden and Flower .rbxm/.rbxmx exports can also preserve the models,
+but the ground/spawn still need to be accounted for. No replacement world assets
+will be fabricated from screenshots.

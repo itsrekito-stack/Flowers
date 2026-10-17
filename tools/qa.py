@@ -185,6 +185,10 @@ if follower_service.is_file():
         errors.append("BeeFollowerService should tag the equipped bee ID")
     if "function BeeFollowerService.Refresh(player: Player)" not in bee_source:
         errors.append("BeeFollowerService should support server-validated equip refresh")
+    if 'if not getTemplate(BeesConfig.StarterId) then' not in bee_source:
+        errors.append("Missing-bee diagnostic must check the WorkerBee fallback")
+    if 'if not template then' in bee_source:
+        errors.append("Authored template cache alone cannot determine fallback availability")
     for forbidden in ("RunService.Heartbeat", "orbitPosition(", "orbitCFrame("):
         if forbidden in bee_source:
             errors.append(f"Bee server still performs per-frame cosmetic updates: {forbidden}")
