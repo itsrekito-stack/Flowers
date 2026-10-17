@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "today": [
+    {
+      "id": "flowers-rojo-studio",
+      "group": "Setup",
+      "title": "Connect Flowers to Roblox Studio with Rojo",
+      "detail": "Install Rojo CLI/plugin; run tools/serve.ps1 and connect in Studio; check Output.",
+      "done": false
+    },
+    {
+      "id": "flowers-model",
+      "group": "World",
+      "title": "Preserve authored flower and garden models",
+      "detail": "Move validated Workspace.Flower and Garden scene to source-controlled models without changing their positions.",
+      "done": false
+    },
+    {
+      "id": "flowers-growth-qa",
+      "group": "QA",
+      "title": "Playtest flower XP and overhead bar",
+      "detail": "Check growth timing, level thresholds and UI at 1366x768 and 1280x720.",
+      "done": false
+    }
+  ],
+  "roadmap": [
+    {
+      "id": "flowers-persistence",
+      "group": "Progression",
+      "title": "Player-owned plots and persisted progression",
+      "detail": "Implement profile lifecycle, schema migration and DataStore tests before player-specific rewards.",
+      "done": false
+    },
+    {
+      "id": "flowers-ui",
+      "group": "UI",
+      "title": "Authored HUD and flower UI states",
+      "detail": "Editable Roblox GUI objects, responsive layouts, hover/selected/disabled/locked states.",
+      "done": false
+    },
+    {
+      "id": "flowers-ci",
+      "group": "QA",
+      "title": "Automated Luau lint, format and Rojo build",
+      "detail": "Add pinned toolchain and CI after CLI installation and first Studio smoke test.",
+      "done": false
+    },
+    {
+      "id": "flowers-multiplayer",
+      "group": "QA",
+      "title": "Multiplayer and persistence runtime acceptance",
+      "detail": "Validate two players, reconnects, growth ownership and server authority.",
+      "done": false
+    }
+  ]
+}

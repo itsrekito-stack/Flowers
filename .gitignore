@@ -17,3 +17,7 @@ Thumbs.db
 
 # Local CLI executables
 rojo.exe
+
+# Local QA output
+.pytest_cache/
+__pycache__/

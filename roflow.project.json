@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "projectId": "flowers",
+  "displayName": "Flowers",
+  "plannerDefaultsPath": "roflow/planner-defaults.json",
+  "buildFile": "Flowers.rbxl",
+  "runtimeProbeEnabled": false,
+  "releaseGateTaskIds": [],
+  "uiStates": []
+}
