@@ -6,4 +6,7 @@ FlowerGrowthService.Start()
 
 local BeeFollowerService = require(script.Parent.Services.BeeFollowerService)
 BeeFollowerService.Start()
+local SimpleGameService = require(script.Parent.Services.SimpleGameService)
+SimpleGameService.Start()
+
 print("[Flowers] server ready")
