@@ -29,6 +29,7 @@ planner = read_json("roflow/planner-defaults.json")
 gui = read_json("src/StarterGui/FlowerProgress.model.json")
 hud = read_json("src/StarterGui/FlowersHUD.model.json")
 game_ui = read_json("src/StarterGui/FlowersGame.model.json")
+inventory_ui = read_json("src/StarterGui/FlowersInventory.model.json")
 game_remotes = read_json("src/ReplicatedStorage/FlowerGameRemotes.model.json")
 
 for path in (
@@ -40,6 +41,8 @@ for path in (
     "src/ReplicatedStorage/FlowerGameRemotes.model.json",
     "src/ServerScriptService/Services/SimpleGameService.luau",
     "src/StarterGui/FlowersGame.model.json",
+    "src/StarterGui/FlowersInventory.model.json",
+    "src/StarterPlayer/StarterPlayerScripts/Controllers/InventoryController.luau",
     "src/StarterPlayer/StarterPlayerScripts/Controllers/SimpleGameController.luau",
     "src/ServerScriptService/Services/BeeFollowerService.luau",
     "src/ServerScriptService/ServerBootstrap.server.luau",
@@ -86,6 +89,45 @@ else:
     for state_id, (root, model) in roots.items():
         if root not in names(model):
             errors.append(f"RoFlow UI state {state_id} references missing root {root}")
+
+# Editable inventory contract: six static cards, real action buttons and
+# initially hidden modal, without client-side construction of fake items.
+if inventory_ui.get("ClassName") != "ScreenGui":
+    errors.append("FlowersInventory must be an authored ScreenGui")
+if inventory_ui.get("Properties", {}).get("Enabled") is not False:
+    errors.append("Inventory must be hidden when a player joins")
+for expected in ("InventoryPanel", "FlowersSection", "BeesSection",
+                 "FlowersTab", "BeesTab", "CloseButton", "Overlay", "Content"):
+    if expected not in names(inventory_ui):
+        errors.append(f"Inventory missing authored node {expected}")
+def all_nodes(node):
+    yield node
+    for item in node.get("Children", []):
+        yield from all_nodes(item)
+expected_cards = {
+    *(f"Flower_{id}" for id in ("daisy", "tulip", "sunflower")),
+    *(f"Bee_{id}" for id in ("worker_bee", "bumble_bee", "crystal_bee")),
+}
+cards = [n for n in all_nodes(inventory_ui) if n.get("Name") in expected_cards]
+if {n.get("Name") for n in cards} != expected_cards or len(cards) != 6:
+    errors.append("Inventory must provide six uniquely authored item cards")
+for card in cards:
+    if card.get("ClassName") != "Frame":
+        errors.append(f"{card.get('Name')} must be Frame")
+    for needed in ("Action", "Title", "Rarity", "Rate", "Status", "Outline"):
+        if needed not in names(card):
+            errors.append(f"{card.get('Name')} missing {needed}")
+    action_node = next((x for x in card.get("Children", []) if x.get("Name") == "Action"), {})
+    if action_node.get("ClassName") != "TextButton":
+        errors.append(f"{card.get('Name')} needs a functioning TextButton")
+for expected in ("InventoryButton",):
+    if expected not in names(game_ui):
+        errors.append(f"Game action dock missing {expected}")
+states = roflow.get("uiStates", [])
+if not any(s.get("id") == "inventory"
+           and s.get("modelPath") == "src/StarterGui/FlowersInventory.model.json"
+           and s.get("root") == "InventoryPanel" for s in states):
+    errors.append("RoFlow must register authored Inventory UI state")
 
 if game_ui.get("ClassName") != "ScreenGui":
     errors.append("FlowersGame must be an authored ScreenGui")
@@ -239,7 +281,7 @@ server_bootstrap = require("src/ServerScriptService/ServerBootstrap.server.luau"
 if game_server.is_file():
     body = game_server.read_text(encoding="utf-8")
     for token in ("Action.OnServerEvent:Connect(onAction)", "State:FireClient(player,",
-                  "if typeof(command) ~= \"string\" or extra ~= nil then return end",
+                  'if typeof(command) ~= "string" or #command > 32',
                   "roll(Flowers.Order, Flowers.ById)", "roll(Bees.Order, Bees.ById)",
                   "nearGarden(player, p)", "Grow", "p.Honey -= Rules.FlowerRollCost",
                   "p.Honey -= Rules.BeeRollCost", "BeeFollower.Refresh(player)",
@@ -264,6 +306,37 @@ if client_bootstrap.is_file():
     body = client_bootstrap.read_text(encoding="utf-8")
     if "SimpleGameController.Start()" not in body:
         errors.append("ClientBootstrap does not start SimpleGameController")
+
+# Root cause regression: plot positions are CFrame, not Vector3.
+if game_server.is_file():
+    body = game_server.read_text(encoding="utf-8")
+    if "object.Position + Vector3.new(0, object.Size.Y / 2, 0)" in body:
+        errors.append("plotPositions must not return a Vector3")
+    for expected in (
+        "table.insert(result, object.CFrame * CFrame.new(0, object.Size.Y / 2, 0))",
+        "table.insert(result, bounds * CFrame.new(0, size.Y / 2, 0))",
+        "p.Plot.Position", 'elseif isSelect then', 'elseif isEquip then',
+        'if (p.Seeds[flowerId] or 0) > 0 then',
+        'if p.Bees[beeId] == true then', 'BeeFollower.Refresh(player)',
+        'if typeof(extra) ~= "string" or #extra > 40 then return end',
+    ):
+        if expected not in body:
+            errors.append(f"Inventory/server slot contract missing {expected}")
+inventory_client = require("src/StarterPlayer/StarterPlayerScripts/Controllers/InventoryController.luau")
+if inventory_client.is_file():
+    body = inventory_client.read_text(encoding="utf-8")
+    for expected in (
+        'gui.Enabled = false', 'stateRemote.OnClientEvent:Connect',
+        'actionRemote:FireServer("SelectFlower", id)',
+        'actionRemote:FireServer("EquipBee", id)',
+        'card.status.Text', 'card.button.Text', 'launch.MouseButton1Click:Connect',
+        'closeButton.MouseButton1Click:Connect',
+        'UserInputService.InputBegan:Connect',
+    ):
+        if expected not in body:
+            errors.append(f"Inventory controller missing {expected}")
+if game_client.is_file() and "InventoryController.Start(action, state)" not in game_client.read_text(encoding="utf-8"):
+    errors.append("Inventory controller must start before RequestState")
 
 # Runtime custom flower migration and slot placement contract.
 model_service = require("src/ServerScriptService/Services/FlowerModelService.luau")
@@ -302,5 +375,5 @@ if errors:
         print(" -", error)
     sys.exit(1)
 
-print("FLOWERS QA: PASS (catalogs, authored models, slot placement, UI, RoFlow)")
+print("FLOWERS QA: PASS (catalogs, slot CFrame, inventory, authored UI, RoFlow)")
 print("NOTE: Rojo build and Roblox Studio playtest must still be run.")
