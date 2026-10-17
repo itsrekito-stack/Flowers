@@ -1,0 +1,13 @@
+{
+  "ClassName": "Folder",
+  "Children": [
+    {
+      "ClassName": "RemoteEvent",
+      "Name": "Action"
+    },
+    {
+      "ClassName": "RemoteEvent",
+      "Name": "State"
+    }
+  ]
+}
