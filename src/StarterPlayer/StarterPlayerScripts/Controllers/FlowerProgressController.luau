@@ -1,119 +1,103 @@
 --!strict
--- Binds authored BillboardGui and ScreenGui to the same server-owned flower state.
+-- One overhead progress bar per local player's growing flower.
+-- The redundant bottom-left FlowersHUD remains authored but disabled.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Config = require(ReplicatedStorage:WaitForChild("Config"):WaitForChild("FlowerConfig"))
+local Flowers = require(ReplicatedStorage:WaitForChild("Config"):WaitForChild("FlowersConfig"))
 local player = Players.LocalPlayer
 
 local FlowerProgressController = {}
 local started = false
 
 function FlowerProgressController.Start()
-    if started then
-        return
-    end
+    if started then return end
     started = true
 
     local gui = player:WaitForChild("PlayerGui"):WaitForChild("FlowerProgress", 20)
     if not gui or not gui:IsA("BillboardGui") then
-        warn("[Flowers] Authored FlowerProgress BillboardGui is missing in PlayerGui")
+        warn("[Flowers/UI] Authored FlowerProgress BillboardGui missing.")
         return
     end
-
-    local screenHud = player:WaitForChild("PlayerGui"):WaitForChild("FlowersHUD", 20)
-    if not screenHud or not screenHud:IsA("ScreenGui") then
-        warn("[Flowers] Authored FlowersHUD ScreenGui is missing in PlayerGui")
-        return
+    local duplicate = player.PlayerGui:FindFirstChild("FlowersHUD")
+    if duplicate and duplicate:IsA("ScreenGui") then
+        duplicate.Enabled = false
     end
-
-    local hudPanel = screenHud:WaitForChild("FlowerStatus")
-    local hudTitle = hudPanel:WaitForChild("Title") :: TextLabel
-    local hudXPText = hudPanel:WaitForChild("XPText") :: TextLabel
-    local hudFill = hudPanel:WaitForChild("XPTrack"):WaitForChild("Fill") :: Frame
-
-    screenHud.Enabled = false
 
     local panel = gui:WaitForChild("ProgressPanel")
     local title = panel:WaitForChild("Title") :: TextLabel
     local xpText = panel:WaitForChild("XPText") :: TextLabel
     local fill = panel:WaitForChild("XPTrack"):WaitForChild("Fill") :: Frame
 
-    local currentFlower: Model? = nil
-    local connections: { RBXScriptConnection } = {}
+    gui.Enabled = false
+    local flower: Model? = nil
+    local connections: {RBXScriptConnection} = {}
 
-    local function disconnectFlower()
+    local function unbind()
         for _, connection in connections do
             connection:Disconnect()
         end
         table.clear(connections)
-        currentFlower = nil
-        gui.Enabled = false
+        flower = nil
         gui.Adornee = nil
-        screenHud.Enabled = false
+        gui.Enabled = false
     end
 
     local function render()
-        local flower = currentFlower
-        if not flower or not flower.Parent then
-            gui.Enabled = false
-            screenHud.Enabled = false
-            return
-        end
-
-        local anchor = flower.PrimaryPart or flower:FindFirstChildWhichIsA("BasePart", true)
-        if not anchor then
+        local model = flower
+        if not model or not model.Parent then
             gui.Enabled = false
             return
         end
+        local anchor = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
+        local lvl = model:GetAttribute("Level")
+        local xp = model:GetAttribute("Experience")
+        local required = model:GetAttribute("RequiredExperience")
+        if not anchor or typeof(lvl) ~= "number"
+            or typeof(xp) ~= "number" or typeof(required) ~= "number"
+            or required <= 0 then
+            gui.Enabled = false
+            return
+        end
 
-        local boundsCF, boundsSize = flower:GetBoundingBox()
-        local target = boundsCF.Position + Vector3.new(0, boundsSize.Y / 2 + 1.5, 0)
+        local cf, size = model:GetBoundingBox()
+        local worldTop = cf.Position + Vector3.new(0, size.Y / 2 + 1.5, 0)
         gui.Adornee = anchor
-        gui.StudsOffsetWorldSpace = target - anchor.Position
+        gui.StudsOffsetWorldSpace = worldTop - anchor.Position
 
-        local level = flower:GetAttribute("Level")
-        local experience = flower:GetAttribute("Experience")
-        local required = flower:GetAttribute("RequiredExperience")
-        if typeof(level) ~= "number" or typeof(experience) ~= "number" or typeof(required) ~= "number" or required <= 0 then
-            gui.Enabled = false
-            return
-        end
-
-        title.Text = string.format("FLOWER  |  LVL %d", level)
-        xpText.Text = string.format("%d / %d XP", experience, required)
-        local progress = math.clamp(experience / required, 0, 1)
-        fill.Size = UDim2.fromScale(progress, 1)
+        local id = model:GetAttribute("FlowerId")
+        local definition = if typeof(id) == "string" then Flowers.ById[id] else nil
+        title.Text = (if definition then definition.DisplayName else "Flower")
+            .. "  |  LVL " .. tostring(lvl)
+        xpText.Text = string.format("%d / %d XP", xp, required)
+        fill.Size = UDim2.fromScale(math.clamp(xp / required, 0, 1), 1)
         gui.Enabled = true
-
-        hudTitle.Text = string.format("FLOWER   LVL %d", level)
-        hudXPText.Text = string.format("%d / %d XP", experience, required)
-        hudFill.Size = UDim2.fromScale(progress, 1)
-        screenHud.Enabled = true
     end
 
-    local function bindFlower(instance: Instance)
-        if instance.Name ~= Config.ModelName or not instance:IsA("Model") then
-            return
-        end
-        disconnectFlower()
-        currentFlower = instance
+    local function bind(candidate: Instance)
+        if not candidate:IsA("Model") then return end
+        if candidate:GetAttribute("OwnerUserId") ~= player.UserId then return end
+        if typeof(candidate:GetAttribute("FlowerId")) ~= "string" then return end
 
-        table.insert(connections, instance:GetAttributeChangedSignal("Level"):Connect(render))
-        table.insert(connections, instance:GetAttributeChangedSignal("Experience"):Connect(render))
-        table.insert(connections, instance:GetAttributeChangedSignal("RequiredExperience"):Connect(render))
-        table.insert(connections, instance.AncestryChanged:Connect(function()
-            if not instance:IsDescendantOf(workspace) then
-                disconnectFlower()
-            end
+        unbind()
+        flower = candidate
+        table.insert(connections, candidate:GetAttributeChangedSignal("Level"):Connect(render))
+        table.insert(connections, candidate:GetAttributeChangedSignal("Experience"):Connect(render))
+        table.insert(connections, candidate:GetAttributeChangedSignal("RequiredExperience"):Connect(render))
+        table.insert(connections, candidate.AncestryChanged:Connect(function()
+            if not candidate:IsDescendantOf(workspace) then unbind() end
         end))
         render()
     end
 
-    workspace.ChildAdded:Connect(bindFlower)
-    local existing = workspace:FindFirstChild(Config.ModelName)
-    if existing then
-        bindFlower(existing)
+    local world = workspace:WaitForChild("FlowersGameWorld", 20)
+    if not world then
+        warn("[Flowers/UI] FlowersGameWorld was not found.")
+        return
+    end
+    world.ChildAdded:Connect(bind)
+    for _, child in world:GetChildren() do
+        bind(child)
     end
 end
 
