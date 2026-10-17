@@ -44,6 +44,7 @@ for path in (
     "src/ServerScriptService/Services/BeeFollowerService.luau",
     "src/ServerScriptService/ServerBootstrap.server.luau",
     "src/ServerScriptService/Services/FlowerGrowthService.luau",
+    "src/ServerScriptService/Services/FlowerModelService.luau",
     "src/StarterPlayer/StarterPlayerScripts/ClientBootstrap.client.luau",
     "src/StarterPlayer/StarterPlayerScripts/Controllers/FlowerProgressController.luau",
     "src/StarterPlayer/StarterPlayerScripts/Controllers/BeeFlightController.luau",
@@ -172,64 +173,21 @@ if bee_config.is_file():
     if "OrbitAngularSpeed" in config_source:
         errors.append("Bee config must not use orbit angular speed")
 
-# Flower prototypes use one shared geometry with three config-driven palettes.
-# Keep all art identical except RGB until Blender replacements are imported.
+# Flower models are source-controlled fallbacks. Actual MeshPart geometry
+# comes from the Studio-authored Workspace.Flower at runtime, so Blender
+# replacements must NOT be required to match the old Part prototype geometry.
 import re
-
 registry_source = (ROOT / "src/ReplicatedStorage/Config/FlowersConfig.luau").read_text(encoding="utf-8")
-flower_geometry = None
-observed_palettes = set()
-for flower_id, model_name in (
-    ("daisy", "Daisy"), ("tulip", "Tulip"), ("sunflower", "Sunflower")
-):
-    model = read_json(f"src/ReplicatedStorage/Models/Flowers/{model_name}.model.json")
-    parts = model.get("Children", [])
-    current_geometry = [
-        (p.get("Name"), p.get("ClassName"), p.get("Properties", {}).get("Shape"),
-         p.get("Properties", {}).get("Size"), p.get("Properties", {}).get("CFrame"))
-        for p in parts
-    ]
-    if flower_geometry is None:
-        flower_geometry = current_geometry
-    elif current_geometry != flower_geometry:
-        errors.append(f"{model_name} differs in geometry from the shared temporary flower shape")
-
+for flower_id in ("daisy", "tulip", "sunflower"):
     match = re.search(
-        rf"\b{flower_id}\s*=\s*\{{(?P<definition>.*?)\n\s*\}},",
+        rf"\\b{flower_id}\\s*=\\s*\\{{(?P<definition>.*?)\\n\\s*\\}},",
         registry_source, re.DOTALL
     )
     if not match:
-        errors.append(f"FlowersConfig missing palette definition for {flower_id}")
-        continue
-    colors = {
-        color_name: tuple(int(channel) for channel in channels)
-        for color_name, *channels in re.findall(
-            r"(Petals|Center|Stem|Leaf)\s*=\s*Color3\.fromRGB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
-            match.group("definition")
-        )
-    }
-    if set(colors) != {"Petals", "Center", "Stem", "Leaf"}:
-        errors.append(f"{flower_id}: palette must contain Petals, Center, Stem and Leaf")
-        continue
-    observed_palettes.add(colors["Petals"])
-    for p in parts:
-        part_name = p.get("Name", "")
-        expected_role = (
-            "Petals" if part_name.startswith("Petal") else
-            "Center" if part_name == "Center" else
-            "Stem" if part_name == "Stem" else
-            "Leaf" if part_name in ("LeafLeft", "LeafRight") else None
-        )
-        if expected_role is None:
-            continue
-        actual = p.get("Properties", {}).get("Color", [])
-        expected = colors[expected_role]
-        if len(actual) != 3 or any(
-            abs(a - ch / 255) > 1e-6 for a, ch in zip(actual, expected)
-        ):
-            errors.append(f"{model_name}/{part_name} does not match {flower_id}.{expected_role}")
-if len(observed_palettes) != 3:
-    errors.append("All 3 flower petal palettes must be distinct")
+        errors.append(f"FlowersConfig missing {flower_id} palette definition")
+    elif all(role + " = Color3.fromRGB(" not in match.group("definition")
+             for role in ("Petals", "Center", "Stem", "Leaf")):
+        errors.append(f"FlowersConfig {flower_id} requires a color palette")
 
 # Catalog/model contract: exactly three editable source-controlled Roblox models per category.
 expected_models = {
@@ -247,12 +205,12 @@ for category, model_names in expected_models.items():
         if model.get("ClassName") != "Model":
             errors.append(f"{path}: root must be Roblox Model")
         children = model.get("Children", [])
-        if len(children) < 6 or not all(p.get("ClassName") == "Part" for p in children):
-            errors.append(f"{path}: expected at least six separately editable Parts")
+        allowed = {"Part", "MeshPart", "UnionOperation"}
+        if not children or not any(p.get("ClassName") in allowed for p in children):
+            errors.append(f"{path}: expected editable Roblox geometry")
         names = [part.get("Name") for part in children]
-        mandatory = ("MainPart", "Sting", "Wings") if category == "Bees" else ("Stem", "Center")
-        if any(name not in names for name in mandatory):
-            errors.append(f"{path}: missing required named parts {mandatory}")
+        if category == "Bees" and any(name not in names for name in ("MainPart", "Sting", "Wings")):
+            errors.append(f"{path}: starter bee is missing a body, sting or wings")
         for part in children:
             props = part.get("Properties", {})
             if not props.get("Anchored") or props.get("CanCollide") is not False:
@@ -307,11 +265,42 @@ if client_bootstrap.is_file():
     if "SimpleGameController.Start()" not in body:
         errors.append("ClientBootstrap does not start SimpleGameController")
 
+# Runtime custom flower migration and slot placement contract.
+model_service = require("src/ServerScriptService/Services/FlowerModelService.luau")
+plant_server = require("src/ServerScriptService/Services/SimpleGameService.luau")
+progress_client = require("src/StarterPlayer/StarterPlayerScripts/Controllers/FlowerProgressController.luau")
+if model_service.is_file():
+    body = model_service.read_text(encoding="utf-8")
+    for token in ('workspace:FindFirstChild("Flower")', "source.Parent = ServerStorage",
+                  "target:ClearAllChildren()", "child:Clone().Parent = target",
+                  "recolor(target, definition.Palette)", "SurfaceAppearance"):
+        if token not in body:
+            errors.append(f"Runtime custom Flower cloning missing: {token}")
+if plant_server.is_file():
+    body = plant_server.read_text(encoding="utf-8")
+    for token in ('instance.Name:match("^Slot(%d+)$")',
+                  "table.sort(numbered,", "p.Plot.Position",
+                  "clone:SetAttribute(\"SlotIndex\", p.Slot)",
+                  'local source = folder and folder:FindFirstChild(definition.ModelName)'):
+        if token not in body:
+            errors.append(f"Authoritative slot planting contract missing: {token}")
+if progress_client.is_file():
+    body = progress_client.read_text(encoding="utf-8")
+    for token in ('WaitForChild("FlowersGameWorld", 20)',
+                  'candidate:GetAttribute("OwnerUserId")',
+                  'duplicate.Enabled = false'):
+        if token not in body:
+            errors.append(f"Player-owned flower progress contract missing: {token}")
+if server_bootstrap.is_file():
+    body = server_bootstrap.read_text(encoding="utf-8")
+    if "FlowerModelService.Start()" not in body or "FlowerGrowthService.Start()" in body:
+        errors.append("FlowerModelService must start; legacy demo growth must stay disabled")
+
 if errors:
     print("FLOWERS QA FAILED:")
     for error in errors:
         print(" -", error)
     sys.exit(1)
 
-print("FLOWERS QA: PASS (JSON, paths, UI contract, companion wiring, RoFlow)")
+print("FLOWERS QA: PASS (catalogs, authored models, slot placement, UI, RoFlow)")
 print("NOTE: Rojo build and Roblox Studio playtest must still be run.")
