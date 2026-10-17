@@ -1,4 +1,4 @@
-# Flowers — Architecture (1.0 stage 1)
+# Flowers — Architecture (1.0 stage 2)
 
 ## Source of truth
 - `main` is authoritative for synced source, not the last state of Studio.
@@ -11,13 +11,14 @@
 - **Shared config**: `ReplicatedStorage/Config/FlowerConfig` contains tunable rules.
 - **Client**: `FlowerProgressController` binds the authored BillboardGui to the local player's planted flower and renders replicated level/XP attributes.
 - **UI**: `src/StarterGui/FlowerProgress.model.json` is the editable overhead BillboardGui; `FlowersGame.model.json` is the active ScreenGui status HUD. Redundant `FlowersHUD.model.json` remains editable for future use but is not enabled.
-- **World**: Studio's manually placed `Workspace.Flower` Model is preserved during Rojo sync by `$ignoreUnknownInstances`.
+- **World**: the authored Garden, Flower, Bee, Baseplate and SpawnLocation are mapped from
+  `src/Workspace/*.model.json`; unknown Workspace roots remain preserved.
 
 ## Source-controlled starter content
 
 - `src/ReplicatedStorage/Config/BeesConfig.luau` defines 3 bee types and starter ID; `FlowersConfig.luau` defines 3 flower types. These are metadata, not reward logic.
 - `src/ReplicatedStorage/Models/Bees/*.model.json` and `Models/Flowers/*.model.json` contain 6 real editable Roblox part models, not thumbnails or scripts.
-- **Runtime authored Flower copies**: `FlowerModelService` clones the geometry of `Workspace.Flower` into the existing Daisy/Tulip/Sunflower catalog Models during Play and applies palettes from `FlowersConfig.ById[flowerId].Palette`. The original Flower is temporarily kept in ServerStorage, untouched. The committed generic Parts are fallback prototypes; to persist custom geometry across blank builds it still needs exporting to Git.
+- **Runtime authored Flower copies**: `FlowerModelService` clones the geometry of `Workspace.Flower` into the existing Daisy/Tulip/Sunflower catalog Models during Play and applies palettes from `FlowersConfig.ById[flowerId].Palette`. The original Flower is temporarily kept in ServerStorage, untouched. The committed generic Parts remain defensive fallbacks; clean builds now include the real authored Workspace.Flower.
 - The first live companion is the catalog's WorkerBee except when an authored `Workspace.Bee` exists. The original Studio bee always takes precedence to avoid replacing existing art.
 - The original `Workspace.Flower` is the source template, not an extra growing demo plant.
 
@@ -29,7 +30,7 @@
 - `BeeFollowerConfig` is the only place for follow/smoothing/bobbing/flapping numbers.
 - The artist-authored `Workspace.Bee` template is moved to `ServerStorage` **at runtime only** so it is not visible as an extra stationary bee.
 - No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.
-- Manual Studio world assets are not yet stored in Git. Do not assume fresh `rojo build` includes a bee.
+- The custom Bee is now source-controlled; WorkerBee remains available when it is absent.
 
 ## Simple Game MVP
 
@@ -58,7 +59,7 @@
   `Workspace.Flower` growth service remains disabled. All XP belongs to player-owned plants.
 
 ## Important limitations before expanding
-- The StarterGui BillboardGui is source-controlled; the manually placed Workspace flower/garden **is not yet**. Export authored world assets into source before using `rojo build` as a complete playable place.
+- Authored world and UI are source-controlled. A clean build must still be playtested in Studio before release.
 - Never change DataStore names/schema without migration once persistence is added.
 - Preserve the existing remote type/rate/ownership validation for every mutation.
 - RoFlow UI Studio can edit the **Game HUD** ScreenGui and the **Flower HUD** ScreenGui; the overhead BillboardGui remains editable in Studio/source.
@@ -117,21 +118,55 @@
   rejoin/respawn/2-player checks in README are mandatory before acceptance.
 
 ## Next stages (require confirmation)
-2. Export Garden and authored Flower without changing placement/pivots.
+2. World import implemented; clean-build Studio acceptance is pending.
 3. Multiplayer slot exhaustion, lifecycle cleanup and negative command tests.
 4. Existing HUD onboarding, numeric balance and viewport checks.
 5. Full manual release checklist, CHANGELOG and v1.0.0 tag.
 
-## Authored flower template correction
+## Source-controlled world — stage 2
 
-`FlowerModelService` now duplicates the entire `Workspace.Flower` Model into
-`ReplicatedStorage.Flower` at startup, before gameplay begins. Catalog variants
-are full Model clones of this template, preserving pivot, scale, PrimaryPart and
-internal instance references. Only catalog copies receive palettes and cosmetic
-physics settings; scripts are disabled on copies. The original is preserved in
-ServerStorage during Play, as before. `InnerCircle` explicitly maps to Center.
+Source: user-uploaded `1.rbxl` (stopped editor scene), SHA-256 recorded in
+`docs/WORLD_IMPORT.md`. Imported exactly five roots: Garden, Flower, Bee,
+Baseplate and SpawnLocation. Garden is a Folder (no Model pivot), containing
+Dirt and Slots/Slot1…Slot9. Flower is a Model with three MeshParts; its stored
+Scale is 0.34439751505851746 and its explicit WorldPivotData is preserved.
 
-Assumption: copying happens during Play, since the Studio-only source cannot be
-read/exported by GitHub. The template path must be vacant; an existing unrelated
-ReplicatedStorage.Flower is preserved and reported. Source-controlled world export
-and the remaining release stages are not included in this correction.
+Each root is a real editable `.model.json` mapped under Workspace. Existing
+names/classes are retained for live reconciliation; unknown Workspace roots
+and unknown children of the five mapped roots are preserved. No runtime service
+recreates authored Garden/Slots. The unrelated avatar Rig and editor Camera are
+not part of the imported gameplay world and are not deleted from a live place.
+
+`FlowerModelService` runs before gameplay: full-clones Workspace.Flower into
+ReplicatedStorage.Flower, parks the original in ServerStorage, and full-clones
+three palette variants into Models.Flowers. InnerCircle and the actual uploaded
+name InnerCircles both map explicitly to Center. BaseScale is a runtime attribute
+on planted clones, derived from the template's GetScale(); growth multiplies it,
+so planting, the first growth tick and save restoration preserve authored size.
+It is derived from the asset and is not a new persisted profile field.
+
+Mesh IDs, mesh dimensions and collision data are retained. Roblox still needs
+access to the referenced mesh assets; headless builds cannot verify asset delivery.
+No Studio scripts were imported over repository logic. Bee fallback remains
+WorkerBee; its missing-model diagnostic checks the resolver, not only the custom
+bee cache. Ground and spawn use their original coordinates, not a generated layout.
+
+### Verification and assumptions
+
+- The uploaded place is the original checkpoint. A separately decoded rbx-dom
+  export of the five roots is committed as `tools/fixtures/authored_world.rbxmx`.
+- `check_world.py` compares 24 instances and 485 exported properties against that
+  snapshot, both before and after Rojo serialization. Positions, rotations,
+  pivots, size, mesh IDs, scale, colors and collision payloads are covered.
+- `world_runtime_spec.luau` executes production FlowerModelService against the
+  clean built DOM, checks 39 assertions, and compiles all shipped Luau. Lune is
+  a headless DOM environment, not Roblox Studio; it cannot certify live physics.
+- The importer intentionally excludes Studio identity/history/capability metadata,
+  derived default caches and editor state; gameplay geometry is retained.
+- Source-controlled world edits follow the same export/sync-back discipline as UI;
+  later unsynced Studio edits must be captured before pulling source changes.
+- Manual gate: open a clean .rbxl build, test spawn, planted/restored flower size,
+  growth/harvest/roll, bee follower, and missing-custom-bee fallback. Check Output.
+
+Stage 2 implementation and headless verification are complete. Studio playtest
+remains pending; stage 3 begins only after user confirmation.

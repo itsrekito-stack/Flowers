@@ -1,0 +1,813 @@
+{
+  "ClassName": "Folder",
+  "Properties": {},
+  "Children": [
+    {
+      "ClassName": "Part",
+      "Name": "Dirt",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": true,
+        "CanTouch": true,
+        "CanQuery": true,
+        "CastShadow": true,
+        "CFrame": [
+          -32.0,
+          -6.5,
+          57.0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "PivotOffset": [
+          0.0,
+          0.0,
+          0.0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "Size": [
+          35.0,
+          1.0,
+          35.0
+        ],
+        "Color": [
+          0.41568627450980394,
+          0.2235294117647059,
+          0.03529411764705882
+        ],
+        "Material": {
+          "Enum": 256
+        },
+        "MaterialVariant": "",
+        "Transparency": 0.0,
+        "Reflectance": 0.0,
+        "Locked": false,
+        "Massless": false,
+        "RootPriority": 0,
+        "CollisionGroup": "Default",
+        "TopSurface": {
+          "Enum": 0
+        },
+        "BottomSurface": {
+          "Enum": 0
+        },
+        "LeftSurface": {
+          "Enum": 0
+        },
+        "RightSurface": {
+          "Enum": 0
+        },
+        "FrontSurface": {
+          "Enum": 0
+        },
+        "BackSurface": {
+          "Enum": 0
+        },
+        "Shape": {
+          "Enum": 1
+        }
+      }
+    },
+    {
+      "ClassName": "Folder",
+      "Name": "Slots",
+      "Properties": {},
+      "Children": [
+        {
+          "ClassName": "Part",
+          "Name": "Slot1",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -20.5,
+              -5.9999918937683105,
+              56.25,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot5",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -44.5,
+              -5.9999918937683105,
+              56.25,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot4",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -40.91035842895508,
+              -5.9999918937683105,
+              64.8095474243164,
+              -0.7008631825447083,
+              0.0,
+              -0.7132957577705383,
+              0.0,
+              1.0,
+              0.0,
+              0.7132957577705383,
+              0.0,
+              -0.7008631825447083
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot3",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -32.5,
+              -5.9999918937683105,
+              68.25,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              -1,
+              0,
+              0
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot6",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -41.059547424316406,
+              -5.9999918937683105,
+              47.839637756347656,
+              -0.7132957577705383,
+              0.0,
+              0.7008631825447083,
+              0.0,
+              1.0,
+              0.0,
+              -0.7008631825447083,
+              0.0,
+              -0.7132957577705383
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot2",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -23.940452575683594,
+              -5.9999918937683105,
+              64.66035461425781,
+              -0.7132957577705383,
+              0.0,
+              0.7008631825447083,
+              0.0,
+              1.0,
+              0.0,
+              -0.7008631825447083,
+              0.0,
+              -0.7132957577705383
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot7",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -32.5,
+              -5.9999918937683105,
+              44.25,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              -1,
+              0,
+              0
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot8",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -24.089641571044922,
+              -5.9999918937683105,
+              47.69044876098633,
+              -0.7008631825447083,
+              0.0,
+              -0.7132957577705383,
+              0.0,
+              1.0,
+              0.0,
+              0.7132957577705383,
+              0.0,
+              -0.7008631825447083
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        },
+        {
+          "ClassName": "Part",
+          "Name": "Slot9",
+          "Properties": {
+            "Anchored": true,
+            "CanCollide": true,
+            "CanTouch": true,
+            "CanQuery": true,
+            "CastShadow": true,
+            "CFrame": [
+              -32.5,
+              -5.9999918937683105,
+              56.25,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "PivotOffset": [
+              0.0,
+              0.0,
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "Size": [
+              5.0,
+              1.0,
+              5.0
+            ],
+            "Color": [
+              0.33725490196078434,
+              0.17647058823529413,
+              0.027450980392156862
+            ],
+            "Material": {
+              "Enum": 256
+            },
+            "MaterialVariant": "",
+            "Transparency": 0.0,
+            "Reflectance": 0.0,
+            "Locked": false,
+            "Massless": false,
+            "RootPriority": 0,
+            "CollisionGroup": "Default",
+            "TopSurface": {
+              "Enum": 0
+            },
+            "BottomSurface": {
+              "Enum": 0
+            },
+            "LeftSurface": {
+              "Enum": 0
+            },
+            "RightSurface": {
+              "Enum": 0
+            },
+            "FrontSurface": {
+              "Enum": 0
+            },
+            "BackSurface": {
+              "Enum": 0
+            },
+            "Shape": {
+              "Enum": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

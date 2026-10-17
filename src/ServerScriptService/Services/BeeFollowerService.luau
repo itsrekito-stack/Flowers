@@ -216,10 +216,11 @@ function BeeFollowerService.Start()
     end)
 
     task.delay(8, function()
-        if not template then
+        if not getTemplate(BeesConfig.StarterId) then
             warn("[Flowers/Bee] Missing both Workspace.Bee and ReplicatedStorage.Models.Bees.WorkerBee.")
         end
     end)
 end
 
 return BeeFollowerService
+
