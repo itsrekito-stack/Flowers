@@ -28,7 +28,7 @@ Put an editable Roblox `Model` named **Flower** in `Workspace` (containing at le
 - an authored BillboardGui shows Level and XP above Flower;
 - progression is server-side, shared and currently resets each server session.
 
-This is a **starter implementation**, not persistence. The GUI is editable in Studio and lives in `src/StarterGui/FlowerProgress.model.json`. UI is not constructed by a script.
+This is a **starter implementation**, not persistence. The overhead BillboardGui is editable in `src/StarterGui/FlowerProgress.model.json`. An additional compact lower-left `ScreenGui` with the same server-owned XP and level is authored in `src/StarterGui/FlowersHUD.model.json` and is the editable **Flower HUD** UI Studio state. UI is not constructed by a script.
 
 ## Bee companion (authored 3D asset)
 

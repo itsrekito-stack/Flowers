@@ -1,0 +1,298 @@
+{
+  "ClassName": "ScreenGui",
+  "Properties": {
+    "Enabled": false,
+    "IgnoreGuiInset": true,
+    "ResetOnSpawn": false,
+    "DisplayOrder": 8,
+    "ZIndexBehavior": "Sibling"
+  },
+  "Children": [
+    {
+      "ClassName": "Frame",
+      "Name": "FlowerStatus",
+      "Properties": {
+        "AnchorPoint": {
+          "Vector2": [
+            0,
+            1
+          ]
+        },
+        "Position": {
+          "UDim2": [
+            [
+              0,
+              16
+            ],
+            [
+              1,
+              -20
+            ]
+          ]
+        },
+        "Size": {
+          "UDim2": [
+            [
+              0,
+              236
+            ],
+            [
+              0,
+              78
+            ]
+          ]
+        },
+        "BackgroundColor3": [
+          0.051,
+          0.082,
+          0.14
+        ],
+        "BackgroundTransparency": 0.06,
+        "BorderSizePixel": 0,
+        "Visible": true
+      },
+      "Children": [
+        {
+          "ClassName": "UICorner",
+          "Name": "Corners",
+          "Properties": {
+            "CornerRadius": {
+              "UDim": [
+                0,
+                12
+              ]
+            }
+          }
+        },
+        {
+          "ClassName": "UIStroke",
+          "Name": "CyanBorder",
+          "Properties": {
+            "Color": [
+              0.09,
+              0.69,
+              0.86
+            ],
+            "Thickness": 1.25,
+            "Transparency": 0.22
+          }
+        },
+        {
+          "ClassName": "TextLabel",
+          "Name": "Title",
+          "Properties": {
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  12
+                ],
+                [
+                  0,
+                  8
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  -24
+                ],
+                [
+                  0,
+                  24
+                ]
+              ]
+            },
+            "BackgroundTransparency": 1,
+            "Font": "GothamBold",
+            "Text": "FLOWER   LVL 1",
+            "TextSize": 14,
+            "TextColor3": [
+              0.93,
+              0.97,
+              1
+            ],
+            "TextXAlignment": "Left"
+          }
+        },
+        {
+          "ClassName": "TextLabel",
+          "Name": "XPText",
+          "Properties": {
+            "AnchorPoint": {
+              "Vector2": [
+                1,
+                0
+              ]
+            },
+            "Position": {
+              "UDim2": [
+                [
+                  1,
+                  -12
+                ],
+                [
+                  0,
+                  10
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  85
+                ],
+                [
+                  0,
+                  20
+                ]
+              ]
+            },
+            "BackgroundTransparency": 1,
+            "Font": "GothamMedium",
+            "Text": "0 / 10 XP",
+            "TextSize": 11,
+            "TextXAlignment": "Right",
+            "TextColor3": [
+              0.69,
+              0.86,
+              0.95
+            ]
+          }
+        },
+        {
+          "ClassName": "Frame",
+          "Name": "XPTrack",
+          "Properties": {
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  12
+                ],
+                [
+                  0,
+                  41
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  -24
+                ],
+                [
+                  0,
+                  13
+                ]
+              ]
+            },
+            "BackgroundColor3": [
+              0.15,
+              0.23,
+              0.35
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": true
+          },
+          "Children": [
+            {
+              "ClassName": "UICorner",
+              "Name": "Corners",
+              "Properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            },
+            {
+              "ClassName": "Frame",
+              "Name": "Fill",
+              "Properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": [
+                  0.09,
+                  0.83,
+                  0.9
+                ],
+                "BorderSizePixel": 0
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        7
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ClassName": "TextLabel",
+          "Name": "Caption",
+          "Properties": {
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  12
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  -24
+                ],
+                [
+                  0,
+                  14
+                ]
+              ]
+            },
+            "BackgroundTransparency": 1,
+            "Text": "GROWTH PROGRESS",
+            "Font": "Gotham",
+            "TextSize": 10,
+            "TextXAlignment": "Left",
+            "TextColor3": [
+              0.56,
+              0.7,
+              0.81
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

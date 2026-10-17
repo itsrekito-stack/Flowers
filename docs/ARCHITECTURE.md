@@ -10,7 +10,7 @@
 - **Server**: `FlowerGrowthService` awards XP, computes level-ups and applies model growth; all progression attributes originate here.
 - **Shared config**: `ReplicatedStorage/Config/FlowerConfig` contains tunable rules.
 - **Client**: `FlowerProgressController` binds the existing authored BillboardGui to the flower and renders replicated attributes.
-- **UI**: `src/StarterGui/FlowerProgress.model.json` is an editable instance tree, not a generated raster or runtime-generated UI.
+- **UI**: `src/StarterGui/FlowerProgress.model.json` is the editable overhead BillboardGui; `src/StarterGui/FlowersHUD.model.json` is the authored ScreenGui status HUD supported by RoFlow UI Studio. Both bind to the same server attributes.
 - **World**: Studio's manually placed `Workspace.Flower` Model is preserved during Rojo sync by `$ignoreUnknownInstances`.
 
 ## Bee Companion (first visual pet)

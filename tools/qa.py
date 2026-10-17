@@ -27,6 +27,7 @@ manifest = read_json("default.project.json")
 roflow = read_json("roflow.project.json")
 planner = read_json("roflow/planner-defaults.json")
 gui = read_json("src/StarterGui/FlowerProgress.model.json")
+hud = read_json("src/StarterGui/FlowersHUD.model.json")
 
 for path in (
     "src/ReplicatedStorage/Config/FlowerConfig.luau",
@@ -49,18 +50,41 @@ if roflow.get("buildFile") != "Flowers.rbxl":
 if planner.get("schemaVersion") != 1:
     errors.append("Unexpected planner schema")
 
-if gui.get("ClassName") != "BillboardGui":
-    errors.append("FlowerProgress must be authored BillboardGui")
-
 def names(node):
     found = [node.get("Name", "")]
     for child in node.get("Children", []):
         found.extend(names(child))
     return found
 
+if hud.get("ClassName") != "ScreenGui":
+    errors.append("FlowersHUD must be an authored ScreenGui")
+
+states = roflow.get("uiStates", [])
+if not states:
+    errors.append("RoFlow needs at least one UI state")
+else:
+    roots = {}
+    for state in states:
+        path = state.get("modelPath", "")
+        if not path or not (ROOT / path).is_file():
+            errors.append("UI state references missing modelPath: " + str(path))
+            continue
+        model = read_json(path)
+        roots[state.get("id", "")] = (state.get("root", ""), model)
+
+    for state_id, (root, model) in roots.items():
+        if root not in names(model):
+            errors.append(f"RoFlow UI state {state_id} references missing root {root}")
+
+if gui.get("ClassName") != "BillboardGui":
+    errors.append("FlowerProgress must be authored BillboardGui")
+
 for required in ("ProgressPanel", "Title", "XPText", "XPTrack", "Fill"):
     if required not in names(gui):
         errors.append(f"FlowerProgress missing authored node: {required}")
+for required in ("FlowerStatus", "Title", "XPText", "XPTrack", "Fill"):
+    if required not in names(hud):
+        errors.append(f"FlowersHUD missing authored node: {required}")
 
 server_bootstrap = require("src/ServerScriptService/ServerBootstrap.server.luau")
 if server_bootstrap.is_file() and "BeeFollowerService.Start()" not in server_bootstrap.read_text(encoding="utf-8"):

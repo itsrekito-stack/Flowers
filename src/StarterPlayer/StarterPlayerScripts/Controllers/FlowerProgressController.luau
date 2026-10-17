@@ -1,5 +1,5 @@
 --!strict
--- Binds an authored BillboardGui; the UI is not constructed in code.
+-- Binds authored BillboardGui and ScreenGui to the same server-owned flower state.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -21,6 +21,19 @@ function FlowerProgressController.Start()
         return
     end
 
+    local screenHud = player:WaitForChild("PlayerGui"):WaitForChild("FlowersHUD", 20)
+    if not screenHud or not screenHud:IsA("ScreenGui") then
+        warn("[Flowers] Authored FlowersHUD ScreenGui is missing in PlayerGui")
+        return
+    end
+
+    local hudPanel = screenHud:WaitForChild("FlowerStatus")
+    local hudTitle = hudPanel:WaitForChild("Title") :: TextLabel
+    local hudXPText = hudPanel:WaitForChild("XPText") :: TextLabel
+    local hudFill = hudPanel:WaitForChild("XPTrack"):WaitForChild("Fill") :: Frame
+
+    screenHud.Enabled = false
+
     local panel = gui:WaitForChild("ProgressPanel")
     local title = panel:WaitForChild("Title") :: TextLabel
     local xpText = panel:WaitForChild("XPText") :: TextLabel
@@ -37,12 +50,14 @@ function FlowerProgressController.Start()
         currentFlower = nil
         gui.Enabled = false
         gui.Adornee = nil
+        screenHud.Enabled = false
     end
 
     local function render()
         local flower = currentFlower
         if not flower or not flower.Parent then
             gui.Enabled = false
+            screenHud.Enabled = false
             return
         end
 
@@ -67,8 +82,14 @@ function FlowerProgressController.Start()
 
         title.Text = string.format("FLOWER  |  LVL %d", level)
         xpText.Text = string.format("%d / %d XP", experience, required)
-        fill.Size = UDim2.fromScale(math.clamp(experience / required, 0, 1), 1)
+        local progress = math.clamp(experience / required, 0, 1)
+        fill.Size = UDim2.fromScale(progress, 1)
         gui.Enabled = true
+
+        hudTitle.Text = string.format("FLOWER   LVL %d", level)
+        hudXPText.Text = string.format("%d / %d XP", experience, required)
+        hudFill.Size = UDim2.fromScale(progress, 1)
+        screenHud.Enabled = true
     end
 
     local function bindFlower(instance: Instance)

@@ -6,5 +6,12 @@
   "buildFile": "Flowers.rbxl",
   "runtimeProbeEnabled": false,
   "releaseGateTaskIds": [],
-  "uiStates": []
+  "uiStates": [
+    {
+      "id": "flower_hud",
+      "label": "Flower HUD",
+      "root": "FlowerStatus",
+      "modelPath": "src/StarterGui/FlowersHUD.model.json"
+    }
+  ]
 }
