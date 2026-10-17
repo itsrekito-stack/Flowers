@@ -13,6 +13,14 @@
 - **UI**: `src/StarterGui/FlowerProgress.model.json` is an editable instance tree, not a generated raster or runtime-generated UI.
 - **World**: Studio's manually placed `Workspace.Flower` Model is preserved during Rojo sync by `$ignoreUnknownInstances`.
 
+## Bee Companion (first visual pet)
+
+- `BeeFollowerService` runs on the server, creates exactly one `Bee_<UserId>` per character in `Workspace.BeeCompanions`, and moves it on a throttled Heartbeat.
+- `BeeFollowerConfig` is the only place for orbit/smoothing/bobbing numbers.
+- The artist-authored `Workspace.Bee` template is moved to `ServerStorage` **at runtime only** so it is not visible as an extra stationary bee.
+- No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.
+- Manual Studio world assets are not yet stored in Git. Do not assume fresh `rojo build` includes a bee.
+
 ## Important limitations before expanding
 - The flower's progression is **shared per server**, not persisted and not tied to a player profile. Do not represent it as save-enabled.
 - The StarterGui BillboardGui is source-controlled; the manually placed Workspace flower/garden **is not yet**. Export authored world assets into source before using `rojo build` as a complete playable place.

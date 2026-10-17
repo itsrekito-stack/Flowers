@@ -21,6 +21,13 @@
       "title": "Playtest flower XP and overhead bar",
       "detail": "Check growth timing, level thresholds and UI at 1366x768 and 1280x720.",
       "done": false
+    },
+    {
+      "id": "flowers-bee-companion-runtime",
+      "group": "Bee / QA",
+      "title": "Verify follower bee in Roblox Studio multiplayer",
+      "detail": "Confirm Workspace.Bee becomes the template; companion orbits each live player, parts stay aligned, original is hidden during Play, respawn/leave cleanup works.",
+      "done": false
     }
   ],
   "roadmap": [
