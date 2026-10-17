@@ -31,12 +31,32 @@
 - No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.
 - Manual Studio world assets are not yet stored in Git. Do not assume fresh `rojo build` includes a bee.
 
+## Simple Game MVP
+
+- `SimpleGameService` is the only authority for rolling, spending Honey,
+  seed counts, bee unlocks, planting, XP, growth and harvest rewards.
+- `GameConfig` centralizes costs, XP multipliers, distance limits and timing.
+- `FlowerGameRemotes/Action` accepts only fixed command strings
+  `RequestState`, `RollFlower`, `RollBee`, `Plant`, `Harvest`. It
+  rejects additional arguments and rate-limits actions. No client-supplied
+  cost, reward, ID or quantity is trusted.
+- `FlowerGameRemotes/State` only replicates filtered per-player session data.
+- `SimpleGameController` binds `FlowersGame.model.json` (all real Roblox
+  ScreenGui GUI instances); no runtime-generated UI components.
+- The server assigns each player one authored `Garden.Slots` placement
+  if available, otherwise generates a simple fallback plot. It places and
+  cleans up at most one growing flower per player under `FlowersGameWorld`.
+- `BeeFollowerService.Refresh` switches the existing follower's model only
+  when the server unlocks a rarer bee.
+- Current player progression is **session-only**, not saved. Existing
+  `Workspace.Flower` demonstration remains separate from player plants.
+
 ## Important limitations before expanding
 - The flower's progression is **shared per server**, not persisted and not tied to a player profile. Do not represent it as save-enabled.
 - The StarterGui BillboardGui is source-controlled; the manually placed Workspace flower/garden **is not yet**. Export authored world assets into source before using `rojo build` as a complete playable place.
 - Never change DataStore names/schema without migration once persistence is added.
 - Add remote type/rate/ownership validation before accepting any client mutations.
-- UI Studio states remain unset until RoFlow support for this BillboardGui editor type is confirmed.
+- RoFlow UI Studio can edit the **Game HUD** ScreenGui and the **Flower HUD** ScreenGui; the overhead BillboardGui remains editable in Studio/source.
 
 ## Next stages
 1. Sync with an empty test place; validate the exact model name `Workspace.Flower`.
