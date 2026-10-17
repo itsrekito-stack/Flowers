@@ -13,7 +13,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Validate project structure and authored UI
+      - name: Install persistence test runtime
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - name: Validate project structure, persistence and authored UI
         run: python tools/qa.py
 
       - name: Install pinned Rojo CLI
@@ -23,3 +25,4 @@ jobs:
           chmod +x /tmp/rojo/rojo
       - name: Build Roblox place with Rojo
         run: /tmp/rojo/rojo build default.project.json -o /tmp/FlowersQA.rbxl
+

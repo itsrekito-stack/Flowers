@@ -1,5 +1,5 @@
 --!strict
--- Simple session-only game: server owns rolls, plants, XP, Honey and rewards.
+-- Persistent game: server owns rolls, plants, XP, Honey and rewards.
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local Config = RS:WaitForChild("Config")
@@ -8,11 +8,24 @@ local Growth = require(Config:WaitForChild("FlowerConfig"))
 local Flowers = require(Config:WaitForChild("FlowersConfig"))
 local Bees = require(Config:WaitForChild("BeesConfig"))
 local BeeFollower = require(script.Parent.BeeFollowerService)
+local DataService = require(script.Parent.DataService)
+local ProfileSchema = require(script.Parent.ProfileSchema)
+local schema = ProfileSchema.new(Rules, Flowers, Bees, Growth)
+local data = DataService.new(game:GetService("DataStoreService"):GetDataStore(DataService.StoreName), schema, {
+    wait = task.wait, now = os.time,
+    token = function() return game:GetService("HttpService"):GenerateGUID(false) end,
+    report = warn,
+})
+local closing = false
+local loading: {[Player]: boolean} = {}
+local pendingSaves = 0
 local Remotes = RS:WaitForChild("FlowerGameRemotes")
 local Action = Remotes:WaitForChild("Action") :: RemoteEvent
 local State = Remotes:WaitForChild("State") :: RemoteEvent
 
 type Profile = {
+    Handle: any,
+    PendingPlant: any,
     Honey: number,
     Seeds: {[string]: number},
     Bees: {[string]: boolean},
@@ -116,7 +129,8 @@ local function send(player: Player, p: Profile)
         PlantedId = if p.Plant then p.Plant:GetAttribute("FlowerId") else "",
         Level = p.Level, XP = p.XP, RequiredXP = xpNeeded(p.Level),
         CanHarvest = p.Plant ~= nil and p.Level >= Rules.HarvestLevel,
-        PlotNumber = p.Slot, Message = p.Message,
+        PlotNumber = p.Slot,
+        Message = if not p.Handle.Writable then "Temporary session: progress will not be saved. " .. p.Message else p.Message,
     })
 end
 
@@ -131,17 +145,9 @@ local function roll(order: {string}, registry: {[string]: any}): string
     return order[#order]
 end
 
-local function spawnFlower(player: Player, p: Profile)
-    if p.Plant then p.Message = "Harvest your flower first."; return end
-    if not nearGarden(player, p) then
-        p.Message = "Move closer to your garden plot."
-        return
-    end
-    if (p.Seeds[p.Selected] or 0) < 1 then
-        p.Message = "Roll a flower seed first."
-        return
-    end
-    local definition = Flowers.ById[p.Selected]
+-- Shared visual restoration; never charges seeds or runs proximity checks.
+local function createPlant(player: Player, p: Profile, id: string, level: number, xp: number, seconds: number)
+    local definition = Flowers.ById[id]
     local models = RS:FindFirstChild("Models")
     local folder = models and models:FindFirstChild("Flowers")
     local source = folder and folder:FindFirstChild(definition.ModelName)
@@ -151,22 +157,39 @@ local function spawnFlower(player: Player, p: Profile)
         return
     end
     local clone = source:Clone()
+    clone:ScaleTo(1 + seconds * Growth.GrowthPerSecond
+        + (level - 1) * Growth.BonusGrowthPerLevel)
     local cf, size = clone:GetBoundingBox()
     local originalBottom = cf.Position.Y - size.Y / 2
     local delta = p.Plot.Position - Vector3.new(cf.Position.X, originalBottom, cf.Position.Z)
     clone:PivotTo(clone:GetPivot() + delta)
     clone.Name = "Growing_" .. tostring(player.UserId)
     clone:SetAttribute("OwnerUserId", player.UserId)
-    clone:SetAttribute("FlowerId", p.Selected)
+    clone:SetAttribute("FlowerId", id)
     clone:SetAttribute("SlotIndex", p.Slot)
-    clone:SetAttribute("Level", 1)
-    clone:SetAttribute("Experience", 0)
-    clone:SetAttribute("RequiredExperience", xpNeeded(1))
+    clone:SetAttribute("Level", level)
+    clone:SetAttribute("Experience", xp)
+    clone:SetAttribute("RequiredExperience", xpNeeded(level))
     clone.Parent = world
-    p.Seeds[p.Selected] -= 1
     p.Plant = clone
-    p.Level, p.XP, p.Seconds = 1, 0, 0
-    p.Message = "Planted " .. definition.DisplayName .. "!"
+    p.Level, p.XP, p.Seconds = level, xp, seconds
+    return true
+end
+
+local function spawnFlower(player: Player, p: Profile)
+    if p.Plant or p.PendingPlant then p.Message = "Harvest your flower first."; return end
+    if not nearGarden(player, p) then
+        p.Message = "Move closer to your garden plot."
+        return
+    end
+    if (p.Seeds[p.Selected] or 0) < 1 then
+        p.Message = "Roll a flower seed first."
+        return
+    end
+    if createPlant(player, p, p.Selected, 1, 0, 0) then
+        p.Seeds[p.Selected] -= 1
+        p.Message = "Planted " .. Flowers.ById[p.Selected].DisplayName .. "!"
+    end
 end
 
 local function grow(p: Profile)
@@ -276,7 +299,7 @@ local function onAction(player: Player, command: any, extra: any, ...: any)
     end
 
     local p = profiles[player]
-    if not p then return end
+    if not p or closing then return end
     local now = os.clock()
     if now - p.LastAction < Rules.ActionCooldown then return end
     p.LastAction = now
@@ -316,22 +339,76 @@ local function onAction(player: Player, command: any, extra: any, ...: any)
     send(player, p)
 end
 
+local function snapshot(p: Profile)
+    return {
+        schemaVersion = 1, Honey = p.Honey,
+        Seeds = table.clone(p.Seeds), Bees = table.clone(p.Bees),
+        Selected = p.Selected, BeeId = p.BeeId,
+        Planted = if p.Plant then {
+            Id = p.Plant:GetAttribute("FlowerId"), Level = p.Level,
+            XP = p.XP, Seconds = p.Seconds,
+        } else p.PendingPlant or false,
+    }
+end
+
+local function saveProfile(p: Profile, release: boolean)
+    pendingSaves += 1
+    local ok = data.Save(p.Handle, snapshot(p), release)
+    pendingSaves -= 1
+    if not ok and p.Handle.Writable then
+        warn("[Flowers/Data] Save failed; previous durable snapshot preserved.")
+    end
+end
+
 local function addPlayer(player: Player)
-    if profiles[player] then return end
+    if profiles[player] or loading[player] or closing then return end
+    loading[player] = true
+    local handle, saved = data.Load(player.UserId)
+    if closing or player.Parent ~= Players then
+        data.Save(handle, saved, true)
+        loading[player] = nil
+        return
+    end
     local index, plot = allocatePlot()
     local profile: Profile = {
-        Honey = Rules.StartingHoney,
-        Seeds = {[Flowers.StarterId] = 1},
-        Bees = {[Bees.StarterId] = true},
-        BeeId = Bees.StarterId, Selected = Flowers.StarterId,
+        Handle = handle, PendingPlant = saved.Planted or nil,
+        Honey = saved.Honey, Seeds = saved.Seeds, Bees = saved.Bees,
+        BeeId = saved.BeeId, Selected = saved.Selected,
         Plant = nil, Level = 1, XP = 0, Seconds = 0,
         Plot = plot, Slot = index,
         LastAction = -math.huge, LastRoll = -math.huge,
-        Message = "Plant your first Daisy seed!",
+        Message = "Welcome! Plant a seed or visit your flower.",
     }
     profiles[player] = profile
+    if saved.Planted then
+        local plant = saved.Planted
+        if createPlant(player, profile, plant.Id, plant.Level, plant.XP, plant.Seconds) then
+            profile.PendingPlant = nil
+        end
+    end
+    loading[player] = nil
     player:SetAttribute("EquippedBeeId", profile.BeeId)
+    BeeFollower.Refresh(player)
     send(player, profile)
+end
+
+local function removePlayer(player: Player)
+    local p = profiles[player]
+    if not p then return end
+    -- Freeze gameplay before any yielding save; keep the plant until snapshot capture.
+    profiles[player] = nil
+    local saved = snapshot(p)
+    if p.Plant then p.Plant:Destroy() end
+    occupied[p.Slot] = nil
+    local generated = generatedPads[p.Slot]
+    if generated then
+        generated:Destroy()
+        generatedPads[p.Slot] = nil
+    end
+    pendingSaves += 1
+    local ok = data.Save(p.Handle, saved, true)
+    pendingSaves -= 1
+    if not ok and p.Handle.Writable then warn("[Flowers/Data] Final save failed.") end
 end
 
 function GameService.Start()
@@ -348,23 +425,32 @@ function GameService.Start()
     end
     Action.OnServerEvent:Connect(onAction)
     Players.PlayerAdded:Connect(addPlayer)
-    Players.PlayerRemoving:Connect(function(player)
-        local p = profiles[player]
-        if not p then return end
-        if p.Plant then p.Plant:Destroy() end
-        occupied[p.Slot] = nil
-        local generated = generatedPads[p.Slot]
-        if generated then
-            generated:Destroy()
-            generatedPads[p.Slot] = nil
+    Players.PlayerRemoving:Connect(removePlayer)
+    for _, player in Players:GetPlayers() do task.spawn(addPlayer, player) end
+    game:BindToClose(function()
+        closing = true
+        for player in profiles do task.spawn(removePlayer, player) end
+        local deadline = os.clock() + 25
+        while (next(profiles) ~= nil or next(loading) ~= nil or pendingSaves > 0)
+            and os.clock() < deadline do
+            task.wait(0.05)
         end
-        profiles[player] = nil
+        if next(loading) ~= nil or pendingSaves > 0 then
+            warn("[Flowers/Data] Shutdown save deadline reached.")
+        end
     end)
-    for _, player in Players:GetPlayers() do addPlayer(player) end
+    task.spawn(function()
+        while not closing do
+            task.wait(DataService.AutosaveSeconds)
+            if closing then break end
+            for _, p in profiles do task.spawn(saveProfile, p, false) end
+        end
+    end)
 
     task.spawn(function()
-        while true do
+        while not closing do
             task.wait(Growth.TickSeconds)
+            if closing then break end
             for player, p in profiles do
                 if p.Plant then
                     grow(p)
@@ -376,3 +462,4 @@ function GameService.Start()
 end
 
 return GameService
+

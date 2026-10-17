@@ -51,22 +51,41 @@ near SpawnLocation. No authored Garden/Flower/Bee instance is permanently delete
 plants or XP bars. The overhead XP bar follows the local player's
 planted flower; the redundant lower-left bar is disabled.
 
-Important MVP limitation: **Honey, seeds, unlocked bees and planted flowers
-are session-only**, reset on rejoin and server restart. No DataStore is
-implemented yet. The 1/n entries are relative roll weights, not guaranteed
-independent probabilities. Multiplayer players each get one reserved plot.
+## Saved progression (stage 1)
 
-## Current demo
+Honey, seeds by ID, unlocked bees, selected flower, equipped bee and the planted
+flower (ID, level, XP and growth ticks) are saved in **Flowers_PlayerData**,
+key **Player_<UserId>**, with **schemaVersion = 1**. The starter kit is awarded
+only for a new profile. Autosave runs every 60 seconds; leaving and server
+shutdown also save. Growth pauses while offline. Plot assignment is per session.
 
-Put an editable Roblox `Model` named **Flower** in `Workspace` (containing at least one BasePart). This should be the same Flower already placed in Studio. With at least one player on the server:
+Loading uses an initial protected request plus three retries (2/4/6-second pauses).
+If loading fails, the HUD says **Temporary session: progress will not be saved**.
+That session never overwrites existing data. Unsupported/corrupt records are also
+preserved. A renewable session lock prevents two servers from overwriting the
+same player. After an unclean server stop, it can take up to 180 seconds to expire.
+A failed save keeps the previous durable snapshot; a prolonged outage or forced
+server termination can lose progress since the last successful save.
 
-- +1 experience each second;
-- next level costs 10, 15, 20, ... XP;
-- base model size rises by 1% per second plus 5% per level;
-- an authored BillboardGui shows Level and XP above Flower;
-- progression is server-side, shared and currently resets each server session.
+### Verify saving in Studio
 
-This is a **starter implementation**, not persistence. The overhead BillboardGui is editable in `src/StarterGui/FlowerProgress.model.json`. An additional compact lower-left `ScreenGui` with the same server-owned XP and level is authored in `src/StarterGui/FlowersHUD.model.json` and is the editable **Flower HUD** UI Studio state. UI is not constructed by a script.
+Use a published **test experience**, enable **Game Settings → Security → Enable
+Studio Access to API Services**, and test the feature branch before merging.
+Studio accesses the same store as that experience; use a separate test experience.
+
+1. Join as a new player: one Daisy seed, Worker Bee and 30 Honey.
+2. Plant, wait for XP, roll/select a flower and equip an unlocked bee; record state.
+3. Stop and rejoin: inventory, Honey, selections and planted level/XP should remain
+   (allow for live growth ticks). The restored plant must not spend another seed.
+4. Leave a plant growing for over 60 seconds to exercise autosave. Harvest and
+   rejoin: the harvested plant must stay absent.
+5. Disable API access and rejoin: a temporary-session warning appears, gameplay
+   works, and re-enabling API access restores the previous saved profile.
+6. Check respawn, leaving during load, and a two-player shutdown. Expect no errors
+   in normal operation; deliberate API failures produce diagnostic warnings.
+
+These Studio checks remain a manual gate; automated tests do not claim them.
+The 1/n entries remain relative roll weights, not independent probabilities.
 
 ## Starter content catalogs
 
@@ -139,6 +158,12 @@ Rojo preserves manually placed Workspace objects during live sync. Those instanc
 
 ## QA
 
-`.\tools\qa.ps1` runs local static project checks and an optional Rojo build if the CLI is in PATH. GitHub Actions runs project contract checks; **no automated Studio Play test has been claimed**.
+Run `python tools/qa.py` for project contracts and persistence behavioral tests.
+The behavioral suite executes the production DataService/ProfileSchema modules
+against a fake DataStore using Lua 5.4 (CLI or shared library). If Lua is missing
+locally, QA explicitly reports a test skip; CI installs it and requires the tests.
+`.\tools\qa.ps1` additionally builds with Rojo when installed. CI also builds
+the place. **No automated Studio Play test has been claimed.**
 
 See [Architecture](docs/ARCHITECTURE.md).
+
