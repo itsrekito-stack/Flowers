@@ -1,4 +1,4 @@
-# Flowers — Architecture (1.0 stage 2)
+# Flowers — Architecture (1.0 stage 3)
 
 ## Source of truth
 - `main` is authoritative for synced source, not the last state of Studio.
@@ -119,7 +119,7 @@
 
 ## Next stages (require confirmation)
 2. World import implemented; clean-build Studio acceptance is pending.
-3. Multiplayer slot exhaustion, lifecycle cleanup and negative command tests.
+3. Multiplayer implementation complete; Studio acceptance pending.
 4. Existing HUD onboarding, numeric balance and viewport checks.
 5. Full manual release checklist, CHANGELOG and v1.0.0 tag.
 
@@ -169,4 +169,35 @@ bee cache. Ground and spawn use their original coordinates, not a generated layo
   growth/harvest/roll, bee follower, and missing-custom-bee fallback. Check Output.
 
 Stage 2 implementation and headless verification are complete. Studio playtest
-remains pending; stage 3 begins only after user confirmation.
+remains pending; stage 3 was subsequently authorized by the user.
+
+## Multiplayer ownership and lifecycle — stage 3
+
+- `allocatePlot` returns session-only Slot=0 with an unused identity CFrame when
+  authored Garden.Slots has no capacity. No authored slot is changed or replaced.
+  Generated fallback pads remain available only if Garden.Slots is absent.
+- Waiting players are queued in profile-load completion order (simplest ordering
+  with asynchronous loading). Leaving removes queue entries. After freeing a slot,
+  assign the next connected profile before yielding for the departing player's save.
+  Shutdown does not allocate new slots. Runtime queues do not alter schema v1.
+- Saved plants waiting for a plot stay in PendingPlant and are serialized unchanged.
+  Their growth pauses until assignment. Restoring never consumes a seed. Rolls and
+  inventory remain usable while waiting; server Plant checks Slot before distance.
+- Existing State.PlotNumber uses 0 for waiting; all command names and legal payloads
+  are unchanged. Existing HUD labels display waiting status and disable Plant.
+- Action counts raw varargs before dispatch. No-argument commands reject any extra
+  value, including nil; SelectFlower/EquipBee require exactly one known string ID.
+  Existing profile, cooldown, cost, ownership and distance checks remain authoritative.
+- Character death keeps the player's planted flower and slot (progress belongs to
+  the player, not the avatar). BeeFollowerService disconnects both player-specific
+  signals on leave. Generation checks before and after a potentially yielding root
+  lookup cancel stale companion spawns during refresh, respawn or removal.
+- `multiplayer_spec.luau` runs production SimpleGameService/BeeFollowerService in a
+  clean Rojo DOM with fake signals, sessions, clock, storage and minimal geometry
+  adapters. It covers command rejection, state mutations, queue handoff, saved-plant
+  safety and bee cleanup. Real asset rendering/physics/networking are not simulated.
+
+Assumptions: authored slots remain stable during a live server; sync world changes
+while Play is stopped. No new capacity, GUI instances, durable fields or gameplay
+features were added. The unexplained red flower/CorePackages stack in the user's
+screenshot remains a separate pending Studio reproduction, not a verified code fix.

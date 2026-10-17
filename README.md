@@ -46,7 +46,8 @@ the slots themselves are never moved or replaced.
 UI is authored in `StarterGui/FlowersGame.model.json` and
 editable in RoFlow **Game HUD** and **Inventory** states. Inventory launches from the dock and can close via X, Escape or a second click; locked/owned/selected/equipped states are driven by server data. Garden slots in `Workspace.Garden.Slots`
 are used when available; otherwise a small temporary field is generated
-near SpawnLocation. No authored Garden/Flower/Bee instance is permanently deleted. The old
+near SpawnLocation only when Garden.Slots is absent. A full authored garden queues
+players instead of generating overflow plots. No authored Garden/Flower/Bee instance is permanently deleted. The old
 `Workspace.Flower` demo growth is disabled so it no longer duplicates
 plants or XP bars. The overhead XP bar follows the local player's
 planted flower; the redundant lower-left bar is disabled.
@@ -166,3 +167,34 @@ Headless model tests do not emulate Roblox physics, network asset loading or
 player sessions. Studio clean-build playtesting remains the stage 2 acceptance gate.
 
 See [Architecture](docs/ARCHITECTURE.md).
+
+## Multiplayer stability — stage 3
+
+A full garden shows **Garden full. Waiting for a free plot.** in the existing HUD.
+Plant stays disabled while waiting. The next waiting player receives a freed plot
+automatically; a saved flower remains preserved and resumes when a plot is assigned.
+Leaving removes the live plant and companion. Respawning keeps the planted flower
+and its progress, and replaces only the companion. Player event connections are
+explicitly disconnected on leave; stale companion spawns are cancelled.
+
+QA now executes the production Action handler and lifecycle with fake player
+sessions: all seven commands, exact argument counts (including extra nil), invalid
+IDs/types, ownership, cooldown, insufficient Honey, distance, planting/harvesting,
+slot exhaustion/reuse, saved-flower restoration, and companion respawn/leave.
+These tests require Lune and supplement the existing persistence and world tests.
+
+### Studio multiplayer acceptance
+
+1. Stop Play before AI SYNC, then start a local server with 2–4 players.
+2. Plant independently: each player gets a different slot and only their own XP.
+3. Respawn a player: their flower/progress survives and exactly one bee returns.
+4. Leave with a growing flower: its live model and bee disappear; another player
+   can use the released slot. Rejoin and verify the saved flower restores.
+5. In a disposable test copy, keep only one slot under Garden.Slots, then join two
+   players. The second waits with Plant disabled; after the first leaves, the second
+   gets the slot automatically. Repeat with a returning player's saved flower.
+6. Check Output for game errors. The previous screenshot showed only the tail of
+   a CorePackages stack; its first error line and the extra red flower still need
+   a fresh stopped-sync Play reproduction. They are not claimed fixed by this stage.
+
+Studio tests remain pending; headless PASS does not certify a live multiplayer run.

@@ -408,6 +408,18 @@ try:
 except Exception as exc:
     errors.append(f"Persistence behavioral tests failed: {exc}")
 
+# All Action commands must pass common validation before profile access/dispatch.
+validation = game_source.split('local function onAction(', 1)[1].split('local p = profiles[player]', 1)[0]
+for command in ('RequestState', 'RollFlower', 'RollBee', 'Plant', 'Harvest', 'SelectFlower', 'EquipBee'):
+    if f'command == "{command}"' not in validation and f'command ~= "{command}"' not in validation:
+        errors.append(f'Action missing validation: {command}')
+for token in ('count ~= 1', 'count ~= 0', 'Flowers.ById[extra]', 'Bees.ById[extra]'):
+    if token not in validation:
+        errors.append(f'Action arity/ID validation missing: {token}')
+for token in ('connection:Disconnect()', 'generations[player] ~= generation'):
+    if token not in bee_source:
+        errors.append(f'Companion cleanup missing: {token}')
+
 # World conversion checks compare against an independent rbx-dom export of 1.rbxl.
 try:
     from check_world import run as check_world
@@ -434,6 +446,8 @@ try:
             check_world(built)
             if lune:
                 subprocess.run([lune, 'run', 'tools/world_runtime_spec.luau', str(built)],
+                               cwd=ROOT, check=True)
+                subprocess.run([lune, 'run', 'tools/multiplayer_spec.luau', str(built)],
                                cwd=ROOT, check=True)
             elif os.environ.get('CI'):
                 raise RuntimeError('CI requires Lune for world model tests')

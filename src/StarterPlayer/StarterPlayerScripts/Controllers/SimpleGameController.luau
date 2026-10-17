@@ -81,7 +81,11 @@ function Controller.Start()
         selected.Text = "SEED: " .. (if chosen then chosen.DisplayName else "Unknown")
             .. " (" .. tostring(seedCount) .. ")"
 
-        if plantedInfo then
+        if data.PlotNumber == 0 then
+            planted.Text = "GARDEN FULL: WAITING FOR A PLOT"
+            xpText.Text = "Your saved flower is safe"
+            fill.Size = UDim2.fromScale(0, 1)
+        elseif plantedInfo then
             planted.Text = "PLOT " .. tostring(data.PlotNumber) .. ": "
                 .. plantedInfo.DisplayName .. " LVL " .. tostring(data.Level)
             xpText.Text = tostring(data.XP) .. " / " .. tostring(data.RequiredXP) .. " XP"
@@ -95,7 +99,7 @@ function Controller.Start()
 
         buttonsActive.RollFlower = data.Honey >= GameConfig.FlowerRollCost
         buttonsActive.RollBee = data.Honey >= GameConfig.BeeRollCost
-        buttonsActive.Plant = (not plantedInfo) and seedCount > 0
+        buttonsActive.Plant = data.PlotNumber > 0 and (not plantedInfo) and seedCount > 0
         buttonsActive.Harvest = data.CanHarvest == true
         for name in actions do updateButton(name) end
 
@@ -143,3 +147,4 @@ function Controller.Start()
 end
 
 return Controller
+

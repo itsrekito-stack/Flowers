@@ -14,7 +14,8 @@ local BeesConfig = require(ConfigFolder:WaitForChild("BeesConfig"))
 local BeeFollowerService = {}
 local started = false
 local followers: { [Player]: Model } = {}
-local boundPlayers: { [Player]: boolean } = {}
+local boundPlayers: { [Player]: {RBXScriptConnection} } = {}
+local generations: {[Player]: number} = {}
 local template: Model? = nil
 local companionFolder: Folder? = nil
 
@@ -107,14 +108,15 @@ local function headingFromSting(model: Model): number
     return manualOffset
 end
 
-local function spawnForCharacter(player: Player, character: Model)
+local function spawnForCharacter(player: Player, character: Model, generation: number)
+    if generations[player] ~= generation then return end
     removeFollower(player)
 
     local rootCandidate = character:WaitForChild("HumanoidRootPart", 10)
     if not rootCandidate or not rootCandidate:IsA("BasePart") then
         return
     end
-    if player.Parent ~= Players or player.Character ~= character then
+    if generations[player] ~= generation or player.Parent ~= Players or player.Character ~= character then
         return
     end
 
@@ -149,21 +151,25 @@ local function spawnForCharacter(player: Player, character: Model)
 end
 
 local function onCharacter(player: Player, character: Model)
-    task.spawn(spawnForCharacter, player, character)
+    local generation = (generations[player] or 0) + 1
+    generations[player] = generation
+    task.spawn(spawnForCharacter, player, character, generation)
 end
 
 local function bindPlayer(player: Player)
     if boundPlayers[player] then
         return
     end
-    boundPlayers[player] = true
+    local connections = {}
+    boundPlayers[player] = connections
 
-    player.CharacterAdded:Connect(function(character)
+    table.insert(connections, player.CharacterAdded:Connect(function(character)
         onCharacter(player, character)
-    end)
-    player.CharacterRemoving:Connect(function()
+    end))
+    table.insert(connections, player.CharacterRemoving:Connect(function()
+        generations[player] = (generations[player] or 0) + 1
         removeFollower(player)
-    end)
+    end))
     if player.Character then
         onCharacter(player, player.Character)
     end
@@ -187,7 +193,9 @@ function BeeFollowerService.Start()
 
     Players.PlayerAdded:Connect(bindPlayer)
     Players.PlayerRemoving:Connect(function(player)
+        for _, connection in boundPlayers[player] or {} do connection:Disconnect() end
         boundPlayers[player] = nil
+        generations[player] = nil
         removeFollower(player)
     end)
 

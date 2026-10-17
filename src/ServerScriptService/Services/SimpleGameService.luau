@@ -45,6 +45,7 @@ local GameService = {}
 local started = false
 local profiles: {[Player]: Profile} = {}
 local occupied: {[number]: boolean} = {}
+local waiting: {Player} = {}
 local generatedPads: {[number]: BasePart} = {}
 local world: Folder
 local rng = Random.new()
@@ -82,8 +83,12 @@ end
 local function allocatePlot(): (number, CFrame)
     local index = 1
     while occupied[index] do index += 1 end
-    occupied[index] = true
     local existing = plotPositions()
+    local garden = workspace:FindFirstChild("Garden")
+    if garden and garden:FindFirstChild("Slots") and not existing[index] then
+        return 0, CFrame.new()
+    end
+    occupied[index] = true
     if existing[index] then return index, existing[index] end
 
     -- No authored garden? Add a small visible plot without deleting Studio art.
@@ -114,7 +119,7 @@ end
 local function nearGarden(player: Player, profile: Profile): boolean
     local char = player.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
-    return root ~= nil and root:IsA("BasePart")
+    return profile.Slot > 0 and root ~= nil and root:IsA("BasePart")
         and (root.Position - profile.Plot.Position).Magnitude <= Rules.PlotDistance
 end
 
@@ -147,6 +152,7 @@ end
 
 -- Shared visual restoration; never charges seeds or runs proximity checks.
 local function createPlant(player: Player, p: Profile, id: string, level: number, xp: number, seconds: number)
+    if p.Slot == 0 then return false end
     local definition = Flowers.ById[id]
     local models = RS:FindFirstChild("Models")
     local folder = models and models:FindFirstChild("Flowers")
@@ -179,6 +185,7 @@ local function createPlant(player: Player, p: Profile, id: string, level: number
 end
 
 local function spawnFlower(player: Player, p: Profile)
+    if p.Slot == 0 then p.Message = "Garden full. Waiting for a free plot."; return end
     if p.Plant or p.PendingPlant then p.Message = "Harvest your flower first."; return end
     if not nearGarden(player, p) then
         p.Message = "Move closer to your garden plot."
@@ -283,16 +290,19 @@ local function rollBee(player: Player, p: Profile, now: number)
     p.Message = "New bee unlocked: " .. definition.DisplayName .. "!"
 end
 
-local function onAction(player: Player, command: any, extra: any, ...: any)
+local function onAction(player: Player, command: any, ...: any)
     -- Every mutation is server-validated: fixed action, ID, ownership and rate.
-    if typeof(command) ~= "string" or #command > 32 or select("#", ...) > 0 then return end
+    if typeof(command) ~= "string" or #command > 32 then return end
+    local count = select("#", ...)
+    local extra = ...
     local isSelect = command == "SelectFlower"
     local isEquip = command == "EquipBee"
     if isSelect or isEquip then
+        if count ~= 1 then return end
         if typeof(extra) ~= "string" or #extra > 40 then return end
         if isSelect and not Flowers.ById[extra] then return end
         if isEquip and not Bees.ById[extra] then return end
-    elseif extra ~= nil then
+    elseif count ~= 0 then
         return
     end
     if command ~= "RequestState" and command ~= "RollFlower"
@@ -383,6 +393,10 @@ local function addPlayer(player: Player)
         Message = "Welcome! Plant a seed or visit your flower.",
     }
     profiles[player] = profile
+    if index == 0 then
+        table.insert(waiting, player)
+        profile.Message = "Garden full. Waiting for a free plot."
+    end
     if saved.Planted then
         local plant = saved.Planted
         if createPlant(player, profile, plant.Id, plant.Level, plant.XP, plant.Seconds) then
@@ -395,6 +409,28 @@ local function addPlayer(player: Player)
     send(player, profile)
 end
 
+-- Queue order is profile-load completion order; no persistent slot ownership.
+local function assignWaiting()
+    while not closing and #waiting > 0 do
+        local player = waiting[1]
+        local p = profiles[player]
+        if not p or player.Parent ~= Players then
+            table.remove(waiting, 1)
+            continue
+        end
+        local index, plot = allocatePlot()
+        if index == 0 then return end
+        table.remove(waiting, 1)
+        p.Slot, p.Plot = index, plot
+        p.Message = "Your garden plot is ready."
+        local plant = p.PendingPlant
+        if plant and createPlant(player, p, plant.Id, plant.Level, plant.XP, plant.Seconds) then
+            p.PendingPlant = nil
+        end
+        send(player, p)
+    end
+end
+
 local function removePlayer(player: Player)
     local p = profiles[player]
     if not p then return end
@@ -402,12 +438,15 @@ local function removePlayer(player: Player)
     profiles[player] = nil
     local saved = snapshot(p)
     if p.Plant then p.Plant:Destroy() end
+    local queued = table.find(waiting, player)
+    if queued then table.remove(waiting, queued) end
     occupied[p.Slot] = nil
     local generated = generatedPads[p.Slot]
     if generated then
         generated:Destroy()
         generatedPads[p.Slot] = nil
     end
+    assignWaiting()
     pendingSaves += 1
     local ok = data.Save(p.Handle, saved, true)
     pendingSaves -= 1
