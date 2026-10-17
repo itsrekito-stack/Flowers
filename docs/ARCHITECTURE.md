@@ -69,3 +69,18 @@
 2. Export/author flower and garden world models to source while preserving pivots and placement.
 3. Add per-player plots/progression and durable data lifecycle.
 4. Add authored HUD, responsive UI tests and service-level gameplay tests.
+
+
+## Authored flower template correction
+
+`FlowerModelService` now duplicates the entire `Workspace.Flower` Model into
+`ReplicatedStorage.Flower` at startup, before gameplay begins. Catalog variants
+are full Model clones of this template, preserving pivot, scale, PrimaryPart and
+internal instance references. Only catalog copies receive palettes and cosmetic
+physics settings; scripts are disabled on copies. The original is preserved in
+ServerStorage during Play, as before. `InnerCircle` explicitly maps to Center.
+
+Assumption: copying happens during Play, since the Studio-only source cannot be
+read/exported by GitHub. The template path must be vacant; an existing unrelated
+ReplicatedStorage.Flower is preserved and reported. Source-controlled world export
+and the remaining release stages are not included in this correction.

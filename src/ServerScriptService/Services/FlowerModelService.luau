@@ -71,7 +71,7 @@ local function recolor(model: Model, palette: {[string]: Color3})
             role = "Leaf"
         elseif name:find("petal") then
             role = "Petals"
-        elseif name:find("center") or name:find("centre") then
+        elseif name == "innercircle" or name:find("center") or name:find("centre") then
             role = "Center"
         elseif greenParts[part] then
             role = "Stem"
@@ -106,32 +106,42 @@ function FlowerModelService.Start()
         return
     end
 
+    -- Never overwrite an unrelated Studio-authored ReplicatedStorage object.
+    if ReplicatedStorage:FindFirstChild("Flower") then
+        warn("[Flowers/Models] ReplicatedStorage.Flower already exists; template copy skipped to preserve it.")
+        return
+    end
+    local template = source:Clone()
+    template.Name = "Flower"
+    -- Keep geometry, hierarchy, pivot, PrimaryPart and original colors intact.
+    for _, item in template:GetDescendants() do
+        if item:IsA("BaseScript") then item.Enabled = false end
+    end
+    template.Parent = ReplicatedStorage
+
     local catalog = ReplicatedStorage:WaitForChild("Models"):WaitForChild("Flowers")
-    -- Preserve the exact artist-authored model in ServerStorage while Play
-    -- is running, avoiding a duplicate static flower in the garden.
+    -- Preserve the original during Play; it returns to Workspace on Stop.
     source.Parent = ServerStorage
 
     for _, id in Flowers.Order do
         local definition = Flowers.ById[id]
-        local target = catalog:FindFirstChild(definition.ModelName)
-        if target and target:IsA("Model") then
-            -- Keep the Rojo-authored Model object/name, but replace its
-            -- temporary children with copies of the three custom MeshParts.
-            target:ClearAllChildren()
-            for _, child in source:GetChildren() do
-                local copy = child:Clone()
-                if copy then
-                    copy.Parent = target
-                end
-            end
-            recolor(target, definition.Palette)
-            target:SetAttribute("FlowerId", id)
-        else
-            warn("[Flowers/Models] Missing catalog Model: " .. definition.ModelName)
+        local previous = catalog:FindFirstChild(definition.ModelName)
+        if previous and not previous:IsA("Model") then
+            warn("[Flowers/Models] Catalog entry must be a Model: " .. definition.ModelName)
+            continue
         end
+        -- Clone the whole Model, not only its children: references such as
+        -- PrimaryPart must point to the matching descendants in each copy.
+        local target = template:Clone()
+        target.Name = definition.ModelName
+        recolor(target, definition.Palette)
+        target:SetAttribute("FlowerId", id)
+        if previous then previous:Destroy() end
+        target.Parent = catalog
     end
 
-    print("[Flowers/Models] Daisy, Tulip and Sunflower cloned from Workspace.Flower")
+    print("[Flowers/Models] ReplicatedStorage.Flower template ready; Daisy, Tulip and Sunflower use its geometry")
 end
 
 return FlowerModelService
+
