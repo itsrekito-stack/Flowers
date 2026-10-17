@@ -23,7 +23,10 @@ end
 local function recolor(model: Model, palette: {[string]: Color3})
     local parts: {BasePart} = {}
     for _, item in model:GetDescendants() do
-        if item:IsA("BasePart") then
+        if item:IsA("BaseScript") then
+            -- Cosmetic templates must never execute arbitrary scripts.
+            item.Enabled = false
+        elseif item:IsA("BasePart") then
             table.insert(parts, item)
             item.Anchored = true
             item.CanCollide = false
@@ -116,7 +119,10 @@ function FlowerModelService.Start()
             -- temporary children with copies of the three custom MeshParts.
             target:ClearAllChildren()
             for _, child in source:GetChildren() do
-                child:Clone().Parent = target
+                local copy = child:Clone()
+                if copy then
+                    copy.Parent = target
+                end
             end
             recolor(target, definition.Palette)
             target:SetAttribute("FlowerId", id)
