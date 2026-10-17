@@ -40,37 +40,29 @@ end
 -- Prefer the user's custom Studio-authored Bee (if present). Otherwise use
 -- the real WorkerBee model from ReplicatedStorage.Models.Bees. This keeps
 -- existing authored Workspace work untouched while enabling clean Rojo builds.
-local function getTemplate(): Model?
-    if template and template.Parent then
-        return template
+-- Preserve the custom authored Workspace.Bee as the default Worker Bee.
+-- Other bees use source-controlled models from ReplicatedStorage.
+local function getTemplate(beeId: string): Model?
+    if beeId == BeesConfig.StarterId then
+        if template and template.Parent == ServerStorage then return template end
+        local authored = ServerStorage:FindFirstChild(Config.TemplateName)
+            or workspace:FindFirstChild(Config.TemplateName)
+        if authored and authored:IsA("Model") and authored.Archivable
+            and authored:FindFirstChildWhichIsA("BasePart", true) then
+            authored.Parent = ServerStorage
+            template = authored
+            return authored
+        end
     end
 
-    local source = ServerStorage:FindFirstChild(Config.TemplateName)
-        or workspace:FindFirstChild(Config.TemplateName)
-
-    if source and source:IsA("Model") then
-        if not source:FindFirstChildWhichIsA("BasePart", true) then
-            warn("[Flowers/Bee] Authored Bee must contain a BasePart.")
-            return nil
-        end
-        if not source.Archivable then
-            warn("[Flowers/Bee] Authored Bee has Archivable=false.")
-            return nil
-        end
-        source.Parent = ServerStorage
-        template = source
-        return source
-    end
-
-    local starter = BeesConfig.ById[BeesConfig.StarterId]
+    local definition = BeesConfig.ById[beeId]
+    if not definition then return nil end
     local models = ReplicatedStorage:FindFirstChild("Models")
     local bees = models and models:FindFirstChild("Bees")
-    local fallback = bees and bees:FindFirstChild(starter.ModelName)
-    if fallback and fallback:IsA("Model")
-        and fallback.Archivable
-        and fallback:FindFirstChildWhichIsA("BasePart", true) then
-        template = fallback
-        return fallback
+    local candidate = bees and bees:FindFirstChild(definition.ModelName)
+    if candidate and candidate:IsA("Model") and candidate.Archivable
+        and candidate:FindFirstChildWhichIsA("BasePart", true) then
+        return candidate
     end
     return nil
 end
@@ -126,7 +118,11 @@ local function spawnForCharacter(player: Player, character: Model)
         return
     end
 
-    local source = getTemplate()
+    local beeId = player:GetAttribute("EquippedBeeId")
+    if typeof(beeId) ~= "string" or not BeesConfig.ById[beeId] then
+        beeId = BeesConfig.StarterId
+    end
+    local source = getTemplate(beeId)
     if not source or followers[player] then
         return
     end
@@ -138,7 +134,7 @@ local function spawnForCharacter(player: Player, character: Model)
     -- These replicated attributes identify the companion to every client,
     -- including late joiners. They do not grant any client gameplay authority.
     clone:SetAttribute("OwnerUserId", player.UserId)
-    clone:SetAttribute("BeeId", BeesConfig.StarterId)
+    clone:SetAttribute("BeeId", beeId)
     clone:SetAttribute("HeadingCorrection", headingFromSting(clone))
 
     local pos = rootCandidate.CFrame:PointToWorldSpace(
@@ -173,6 +169,13 @@ local function bindPlayer(player: Player)
     end
 end
 
+function BeeFollowerService.Refresh(player: Player)
+    -- Only invoked by the server when a stronger bee is unlocked.
+    if player.Parent == Players and player.Character then
+        onCharacter(player, player.Character)
+    end
+end
+
 function BeeFollowerService.Start()
     if started then
         return
@@ -180,7 +183,7 @@ function BeeFollowerService.Start()
     started = true
 
     ensureFolder()
-    getTemplate()
+    getTemplate(BeesConfig.StarterId)
 
     Players.PlayerAdded:Connect(bindPlayer)
     Players.PlayerRemoving:Connect(function(player)
@@ -201,7 +204,7 @@ function BeeFollowerService.Start()
             -- An authored model added after Play should replace the starter
             -- template for future respawns, without overwriting current bees.
             template = nil
-            if not getTemplate() then
+            if not getTemplate(BeesConfig.StarterId) then
                 return
             end
             for _, player in Players:GetPlayers() do
