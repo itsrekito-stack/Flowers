@@ -1,0 +1,449 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "Stem",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.23,
+          0.64,
+          0.3
+        ],
+        "Shape": "Cylinder",
+        "Size": [
+          0.2,
+          2.05,
+          0.2
+        ],
+        "CFrame": [
+          0,
+          1.03,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "LeafLeft",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.1,
+          0.43,
+          0.21
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.6,
+          0.13,
+          0.32
+        ],
+        "CFrame": [
+          -0.32,
+          0.84,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "LeafRight",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.23,
+          0.64,
+          0.3
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.6,
+          0.13,
+          0.32
+        ],
+        "CFrame": [
+          0.33,
+          1.24,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Center",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          1,
+          0.82,
+          0.12
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.47,
+          0.47,
+          0.45
+        ],
+        "CFrame": [
+          0,
+          2.2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal01",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          0.54,
+          2.2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal02",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          0.382,
+          2.2,
+          0.382,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal03",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          0,
+          2.2,
+          0.54,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal04",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          -0.382,
+          2.2,
+          0.382,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal05",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          -0.54,
+          2.2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal06",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          -0.382,
+          2.2,
+          -0.382,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal07",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          0,
+          2.2,
+          -0.54,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Petal08",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.97,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.62,
+          0.68,
+          0.3
+        ],
+        "CFrame": [
+          0.382,
+          2.2,
+          -0.382,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    }
+  ]
+}

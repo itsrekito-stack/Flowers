@@ -28,6 +28,13 @@
       "title": "Verify follower bee in Roblox Studio multiplayer",
       "detail": "Studio two-player QA: bee floats behind its owner, faces player, smoothly interpolates movement/turns, wings flutter, teleport snaps safely, cleanup works on respawn/leave. Source checks do not replace Play Test.",
       "done": false
+    },
+    {
+      "id": "flowers-catalog-runtime-qa",
+      "group": "Content / QA",
+      "title": "Verify 3 bees and 3 flowers in ReplicatedStorage",
+      "detail": "After AI SYNC check ReplicatedStorage.Models.Bees/Flowers each has 3 editable source-controlled Roblox Models, and Bee follower uses WorkerBee if Workspace.Bee is absent. Test in Studio.",
+      "done": false
     }
   ],
   "roadmap": [

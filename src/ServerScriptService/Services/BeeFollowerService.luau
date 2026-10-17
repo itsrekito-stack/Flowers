@@ -7,7 +7,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
-local Config = require(ReplicatedStorage:WaitForChild("Config"):WaitForChild("BeeFollowerConfig"))
+local ConfigFolder = ReplicatedStorage:WaitForChild("Config")
+local Config = require(ConfigFolder:WaitForChild("BeeFollowerConfig"))
+local BeesConfig = require(ConfigFolder:WaitForChild("BeesConfig"))
 
 local BeeFollowerService = {}
 local started = false
@@ -35,30 +37,42 @@ local function ensureFolder(): Folder
     return folder
 end
 
+-- Prefer the user's custom Studio-authored Bee (if present). Otherwise use
+-- the real WorkerBee model from ReplicatedStorage.Models.Bees. This keeps
+-- existing authored Workspace work untouched while enabling clean Rojo builds.
 local function getTemplate(): Model?
-    if template and template.Parent == ServerStorage then
+    if template and template.Parent then
         return template
     end
 
     local source = ServerStorage:FindFirstChild(Config.TemplateName)
         or workspace:FindFirstChild(Config.TemplateName)
 
-    if not source or not source:IsA("Model") then
-        return nil
+    if source and source:IsA("Model") then
+        if not source:FindFirstChildWhichIsA("BasePart", true) then
+            warn("[Flowers/Bee] Authored Bee must contain a BasePart.")
+            return nil
+        end
+        if not source.Archivable then
+            warn("[Flowers/Bee] Authored Bee has Archivable=false.")
+            return nil
+        end
+        source.Parent = ServerStorage
+        template = source
+        return source
     end
 
-    if not source:FindFirstChildWhichIsA("BasePart", true) then
-        warn("[Flowers/Bee] Bee Model must contain at least one BasePart.")
-        return nil
+    local starter = BeesConfig.ById[BeesConfig.StarterId]
+    local models = ReplicatedStorage:FindFirstChild("Models")
+    local bees = models and models:FindFirstChild("Bees")
+    local fallback = bees and bees:FindFirstChild(starter.ModelName)
+    if fallback and fallback:IsA("Model")
+        and fallback.Archivable
+        and fallback:FindFirstChildWhichIsA("BasePart", true) then
+        template = fallback
+        return fallback
     end
-    if not source.Archivable then
-        warn("[Flowers/Bee] Bee Model has Archivable=false; enable it in Properties.")
-        return nil
-    end
-
-    source.Parent = ServerStorage
-    template = source
-    return source
+    return nil
 end
 
 local function removeFollower(player: Player)
@@ -124,6 +138,7 @@ local function spawnForCharacter(player: Player, character: Model)
     -- These replicated attributes identify the companion to every client,
     -- including late joiners. They do not grant any client gameplay authority.
     clone:SetAttribute("OwnerUserId", player.UserId)
+    clone:SetAttribute("BeeId", BeesConfig.StarterId)
     clone:SetAttribute("HeadingCorrection", headingFromSting(clone))
 
     local pos = rootCandidate.CFrame:PointToWorldSpace(
@@ -183,6 +198,9 @@ function BeeFollowerService.Start()
             return
         end
         task.defer(function()
+            -- An authored model added after Play should replace the starter
+            -- template for future respawns, without overwriting current bees.
+            template = nil
             if not getTemplate() then
                 return
             end
@@ -196,7 +214,7 @@ function BeeFollowerService.Start()
 
     task.delay(8, function()
         if not template then
-            warn("[Flowers/Bee] No Workspace.Bee Model found. Add your editable Bee Model to Workspace.")
+            warn("[Flowers/Bee] Missing both Workspace.Bee and ReplicatedStorage.Models.Bees.WorkerBee.")
         end
     end)
 end

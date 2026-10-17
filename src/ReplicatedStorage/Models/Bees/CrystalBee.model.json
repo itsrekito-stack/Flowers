@@ -1,0 +1,487 @@
+{
+  "ClassName": "Model",
+  "Children": [
+    {
+      "Name": "MainPart",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.25,
+          0.8,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          1.545,
+          1.0815000000000001,
+          1.3390000000000002
+        ],
+        "CFrame": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "StripeA",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.09,
+          0.25,
+          0.42
+        ],
+        "Shape": "Ball",
+        "Size": [
+          1.5553000000000001,
+          0.3914,
+          0.1648
+        ],
+        "CFrame": [
+          0,
+          0.051500000000000004,
+          0.1854,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "StripeB",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.09,
+          0.25,
+          0.42
+        ],
+        "Shape": "Ball",
+        "Size": [
+          1.5553000000000001,
+          0.3914,
+          0.1648
+        ],
+        "CFrame": [
+          0,
+          0.051500000000000004,
+          -0.20600000000000002,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Face",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.25,
+          0.8,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.9784999999999999,
+          0.6695000000000001,
+          0.28840000000000005
+        ],
+        "CFrame": [
+          0,
+          0.0206,
+          -0.5871,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "EyeLeft",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.13,
+          0.12,
+          0.17
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.1648,
+          0.20600000000000002,
+          0.1236
+        ],
+        "CFrame": [
+          -0.3502,
+          0.1236,
+          -0.7622,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "EyeRight",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.13,
+          0.12,
+          0.17
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.1648,
+          0.20600000000000002,
+          0.1236
+        ],
+        "CFrame": [
+          0.3502,
+          0.1236,
+          -0.7622,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Sting",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.09,
+          0.25,
+          0.42
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.2472,
+          0.2266,
+          0.3914
+        ],
+        "CFrame": [
+          0,
+          -0.0824,
+          0.8961,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Wings",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.69,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          2.1836,
+          0.1545,
+          0.721
+        ],
+        "CFrame": [
+          0,
+          0.6386000000000001,
+          0.051500000000000004,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "Transparency": 0.3
+      }
+    },
+    {
+      "Name": "AntennaLeft",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.09,
+          0.25,
+          0.42
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.0927,
+          0.3502,
+          0.0927
+        ],
+        "CFrame": [
+          -0.33990000000000004,
+          0.5973999999999999,
+          -0.4635,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "AntennaRight",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "SmoothPlastic",
+        "Color": [
+          0.09,
+          0.25,
+          0.42
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.0927,
+          0.3502,
+          0.0927
+        ],
+        "CFrame": [
+          0.33990000000000004,
+          0.5973999999999999,
+          -0.4635,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "CrystalLeft",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "Neon",
+        "Color": [
+          0.69,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.2575,
+          0.4635,
+          0.41200000000000003
+        ],
+        "CFrame": [
+          -0.7004,
+          0,
+          0.2472,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "CrystalRight",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "Neon",
+        "Color": [
+          0.69,
+          0.98,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.2575,
+          0.4635,
+          0.41200000000000003
+        ],
+        "CFrame": [
+          0.7004,
+          0,
+          0.2472,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "Name": "Crest",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false,
+        "CastShadow": false,
+        "Material": "Neon",
+        "Color": [
+          0.25,
+          0.8,
+          1
+        ],
+        "Shape": "Ball",
+        "Size": [
+          0.2575,
+          0.3914,
+          0.28840000000000005
+        ],
+        "CFrame": [
+          0,
+          0.6695000000000001,
+          -0.309,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    }
+  ]
+}

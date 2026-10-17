@@ -30,9 +30,36 @@ Put an editable Roblox `Model` named **Flower** in `Workspace` (containing at le
 
 This is a **starter implementation**, not persistence. The overhead BillboardGui is editable in `src/StarterGui/FlowerProgress.model.json`. An additional compact lower-left `ScreenGui` with the same server-owned XP and level is authored in `src/StarterGui/FlowersHUD.model.json` and is the editable **Flower HUD** UI Studio state. UI is not constructed by a script.
 
+## Starter content catalogs
+
+The game now contains **three bees and three flowers** in
+`ReplicatedStorage.Models.Bees` and `ReplicatedStorage.Models.Flowers`.
+Each template is an **editable Roblox Model made of Parts**, authored as a
+source-controlled Rojo `.model.json` file.
+
+| Category | ID | Display name | Model | Rarity |
+| --- | --- | --- | --- | --- |
+| Bee | `worker_bee` | Worker Bee | `WorkerBee` | 1/2 |
+| Bee | `bumble_bee` | Bumble Bee | `BumbleBee` | 1/10 |
+| Bee | `crystal_bee` | Crystal Bee | `CrystalBee` | 1/50 |
+| Flower | `daisy` | Daisy | `Daisy` | 1/2 |
+| Flower | `tulip` | Tulip | `Tulip` | 1/10 |
+| Flower | `sunflower` | Sunflower | `Sunflower` | 1/50 |
+
+Shared definitions live in `Config/BeesConfig.luau` and
+`Config/FlowersConfig.luau`. Rarity is catalog metadata for future
+roll mechanics; **it does not implement rolling or give items**. Current
+bee-follower uses `worker_bee` by default if no custom `Workspace.Bee`
+exists. Existing `Workspace.Bee` takes precedence and remains editable.
+
+Important: **GitHub cannot read an unsynced model out of your running Studio**.
+These are six new source-controlled models based on Roblox Parts, not exact
+exports of your manually created bee/flower. The existing `Workspace.Flower`
+remains the growing demonstration flower, and is not replaced.
+
 ## Bee companion (authored 3D asset)
 
-Place your existing **Model** called `Bee` directly in `Workspace` in Studio, with `MainPart`, `Sting`, `Wings` inside. The runtime server service moves that authoring model to `ServerStorage` while Play is running, clones one Bee per player into `Workspace.BeeCompanions`, and moves every cloned part together. When you stop Play, the original Bee is still in its Studio edit position.
+Place your existing **Model** called `Bee` directly in `Workspace` in Studio, with `MainPart`, `Sting`, `Wings` inside. The runtime server service moves that authoring model to `ServerStorage` while Play is running. If that model does not exist, it clones the source-controlled `ReplicatedStorage.Models.Bees.WorkerBee` instead. In either case it creates one Bee per player in `Workspace.BeeCompanions`. When you stop Play, the original Bee is still in its Studio edit position.
 
 - Automatically spawns when a character loads and respawns after death; cleans up when the player leaves.
 - Flies **behind the character** (slightly to the side), gently bobs and banks, and faces **toward the player** rather than circling around them. Every client renders smooth motion and turns per frame, independent of server/network update rate.

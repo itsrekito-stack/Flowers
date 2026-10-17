@@ -32,6 +32,8 @@ hud = read_json("src/StarterGui/FlowersHUD.model.json")
 for path in (
     "src/ReplicatedStorage/Config/FlowerConfig.luau",
     "src/ReplicatedStorage/Config/BeeFollowerConfig.luau",
+    "src/ReplicatedStorage/Config/BeesConfig.luau",
+    "src/ReplicatedStorage/Config/FlowersConfig.luau",
     "src/ServerScriptService/Services/BeeFollowerService.luau",
     "src/ServerScriptService/ServerBootstrap.server.luau",
     "src/ServerScriptService/Services/FlowerGrowthService.luau",
@@ -100,6 +102,12 @@ if follower_service.is_file():
                      "headingFromSting(clone)", 'SetAttribute("OwnerUserId"', 'SetAttribute("HeadingCorrection"'):
         if expected not in bee_source:
             errors.append(f"Bee server ownership/lifecycle regression: missing {expected}")
+    if 'require(ConfigFolder:WaitForChild("BeesConfig"))' not in bee_source:
+        errors.append("BeeFollowerService must read BeesConfig for the starter bee")
+    if 'FindFirstChild(starter.ModelName)' not in bee_source:
+        errors.append("BeeFollowerService must resolve starter model in ReplicatedStorage")
+    if 'clone:SetAttribute("BeeId", BeesConfig.StarterId)' not in bee_source:
+        errors.append("BeeFollowerService should tag cloned bee with its catalog ID")
     for forbidden in ("RunService.Heartbeat", "orbitPosition(", "orbitCFrame("):
         if forbidden in bee_source:
             errors.append(f"Bee server still performs per-frame cosmetic updates: {forbidden}")
@@ -129,6 +137,48 @@ if bee_config.is_file():
             errors.append(f"Bee smooth flight config missing {expected}")
     if "OrbitAngularSpeed" in config_source:
         errors.append("Bee config must not use orbit angular speed")
+
+# Catalog/model contract: exactly three editable source-controlled Roblox models per category.
+expected_models = {
+    "Bees": ["WorkerBee", "BumbleBee", "CrystalBee"],
+    "Flowers": ["Daisy", "Tulip", "Sunflower"],
+}
+for category, model_names in expected_models.items():
+    model_folder = ROOT / "src" / "ReplicatedStorage" / "Models" / category
+    actual_files = sorted(file.stem.removesuffix(".model") for file in model_folder.glob("*.model.json"))
+    if sorted(model_names) != actual_files:
+        errors.append(f"{category} models: expected {model_names}, found {actual_files}")
+    for model_name in model_names:
+        path = f"src/ReplicatedStorage/Models/{category}/{model_name}.model.json"
+        model = read_json(path)
+        if model.get("ClassName") != "Model":
+            errors.append(f"{path}: root must be Roblox Model")
+        children = model.get("Children", [])
+        if len(children) < 6 or not all(p.get("ClassName") == "Part" for p in children):
+            errors.append(f"{path}: expected at least six separately editable Parts")
+        names = [part.get("Name") for part in children]
+        mandatory = ("MainPart", "Sting", "Wings") if category == "Bees" else ("Stem", "Center")
+        if any(name not in names for name in mandatory):
+            errors.append(f"{path}: missing required named parts {mandatory}")
+        for part in children:
+            props = part.get("Properties", {})
+            if not props.get("Anchored") or props.get("CanCollide") is not False:
+                errors.append(f"{path}: {part.get('Name')} must be anchored/non-collidable")
+            if not isinstance(props.get("CFrame"), list) or len(props["CFrame"]) != 12:
+                errors.append(f"{path}: {part.get('Name')} must have a valid 12-number CFrame")
+            if not isinstance(props.get("Size"), list) or len(props["Size"]) != 3:
+                errors.append(f"{path}: {part.get('Name')} must have a Size")
+
+for category, registry, expected_ids in (
+    ("Bees", "BeesConfig", ("worker_bee", "bumble_bee", "crystal_bee")),
+    ("Flowers", "FlowersConfig", ("daisy", "tulip", "sunflower")),
+):
+    source = require(f"src/ReplicatedStorage/Config/{registry}.luau")
+    if source.is_file():
+        body = source.read_text(encoding="utf-8")
+        for model, item_id in zip(expected_models[category], expected_ids):
+            if f'ModelName = "{model}"' not in body or f'Id = "{item_id}"' not in body:
+                errors.append(f"{registry} missing valid mapping {item_id} -> {model}")
 
 if errors:
     print("FLOWERS QA FAILED:")
