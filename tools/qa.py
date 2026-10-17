@@ -180,7 +180,7 @@ import re
 registry_source = (ROOT / "src/ReplicatedStorage/Config/FlowersConfig.luau").read_text(encoding="utf-8")
 for flower_id in ("daisy", "tulip", "sunflower"):
     match = re.search(
-        rf"\\b{flower_id}\\s*=\\s*\\{{(?P<definition>.*?)\\n\\s*\\}},",
+        rf"\b{flower_id}\s*=\s*\{{(?P<definition>.*?)\n\s*\}},",
         registry_source, re.DOTALL
     )
     if not match:
