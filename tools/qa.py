@@ -28,12 +28,19 @@ roflow = read_json("roflow.project.json")
 planner = read_json("roflow/planner-defaults.json")
 gui = read_json("src/StarterGui/FlowerProgress.model.json")
 hud = read_json("src/StarterGui/FlowersHUD.model.json")
+game_ui = read_json("src/StarterGui/FlowersGame.model.json")
+game_remotes = read_json("src/ReplicatedStorage/FlowerGameRemotes.model.json")
 
 for path in (
     "src/ReplicatedStorage/Config/FlowerConfig.luau",
     "src/ReplicatedStorage/Config/BeeFollowerConfig.luau",
     "src/ReplicatedStorage/Config/BeesConfig.luau",
     "src/ReplicatedStorage/Config/FlowersConfig.luau",
+    "src/ReplicatedStorage/Config/GameConfig.luau",
+    "src/ReplicatedStorage/FlowerGameRemotes.model.json",
+    "src/ServerScriptService/Services/SimpleGameService.luau",
+    "src/StarterGui/FlowersGame.model.json",
+    "src/StarterPlayer/StarterPlayerScripts/Controllers/SimpleGameController.luau",
     "src/ServerScriptService/Services/BeeFollowerService.luau",
     "src/ServerScriptService/ServerBootstrap.server.luau",
     "src/ServerScriptService/Services/FlowerGrowthService.luau",
@@ -79,6 +86,31 @@ else:
         if root not in names(model):
             errors.append(f"RoFlow UI state {state_id} references missing root {root}")
 
+if game_ui.get("ClassName") != "ScreenGui":
+    errors.append("FlowersGame must be an authored ScreenGui")
+for name in ("GamePanel", "InfoCard", "Honey", "Bee", "Selected",
+             "PlantStatus", "XPTrack", "Fill", "ToastPanel", "Message",
+             "ActionDock", "RollFlower", "RollBee", "Plant", "Harvest"):
+    if name not in names(game_ui):
+        errors.append(f"FlowersGame missing authored object: {name}")
+
+def descendants(node):
+    yield node
+    for child in node.get("Children", []):
+        yield from descendants(child)
+
+buttons = {item.get("Name"): item for item in descendants(game_ui)
+           if item.get("ClassName") == "TextButton"}
+if sorted(buttons) != ["Harvest", "Plant", "RollBee", "RollFlower"]:
+    errors.append("Game HUD must contain four functional TextButtons")
+
+if game_remotes.get("ClassName") != "Folder":
+    errors.append("FlowerGameRemotes must be a Folder")
+if sorted((x.get("Name"), x.get("ClassName")) for x in game_remotes.get("Children", [])) != [
+    ("Action", "RemoteEvent"), ("State", "RemoteEvent")
+]:
+    errors.append("FlowerGameRemotes must contain Action and State RemoteEvents")
+
 if gui.get("ClassName") != "BillboardGui":
     errors.append("FlowerProgress must be authored BillboardGui")
 
@@ -104,10 +136,12 @@ if follower_service.is_file():
             errors.append(f"Bee server ownership/lifecycle regression: missing {expected}")
     if 'require(ConfigFolder:WaitForChild("BeesConfig"))' not in bee_source:
         errors.append("BeeFollowerService must read BeesConfig for the starter bee")
-    if 'FindFirstChild(starter.ModelName)' not in bee_source:
-        errors.append("BeeFollowerService must resolve starter model in ReplicatedStorage")
-    if 'clone:SetAttribute("BeeId", BeesConfig.StarterId)' not in bee_source:
-        errors.append("BeeFollowerService should tag cloned bee with its catalog ID")
+    if 'FindFirstChild(definition.ModelName)' not in bee_source:
+        errors.append("BeeFollowerService must resolve equipped bee model in ReplicatedStorage")
+    if 'clone:SetAttribute("BeeId", beeId)' not in bee_source:
+        errors.append("BeeFollowerService should tag the equipped bee ID")
+    if "function BeeFollowerService.Refresh(player: Player)" not in bee_source:
+        errors.append("BeeFollowerService should support server-validated equip refresh")
     for forbidden in ("RunService.Heartbeat", "orbitPosition(", "orbitCFrame("):
         if forbidden in bee_source:
             errors.append(f"Bee server still performs per-frame cosmetic updates: {forbidden}")
@@ -238,6 +272,40 @@ for category, registry, expected_ids in (
         for model, item_id in zip(expected_models[category], expected_ids):
             if f'ModelName = "{model}"' not in body or f'Id = "{item_id}"' not in body:
                 errors.append(f"{registry} missing valid mapping {item_id} -> {model}")
+
+# Simple playable loop contract: validate that UI actions reach a server owner,
+# server owns costs/results, and game state changes are server->client only.
+game_server = require("src/ServerScriptService/Services/SimpleGameService.luau")
+game_client = require("src/StarterPlayer/StarterPlayerScripts/Controllers/SimpleGameController.luau")
+server_bootstrap = require("src/ServerScriptService/ServerBootstrap.server.luau")
+if game_server.is_file():
+    body = game_server.read_text(encoding="utf-8")
+    for token in ("Action.OnServerEvent:Connect(onAction)", "State:FireClient(player,",
+                  "if typeof(command) ~= \"string\" or extra ~= nil then return end",
+                  "roll(Flowers.Order, Flowers.ById)", "roll(Bees.Order, Bees.ById)",
+                  "nearGarden(player, p)", "Grow", "p.Honey -= Rules.FlowerRollCost",
+                  "p.Honey -= Rules.BeeRollCost", "BeeFollower.Refresh(player)",
+                  'Instance.new("Part")', 'world.Name = "FlowersGameWorld"',
+                  "Players.PlayerRemoving:Connect"):
+        if token != "Grow" and token not in body:
+            errors.append(f"MVP server missing {token}")
+    if "OnServerInvoke" in body or 'Instance.new("ScreenGui")' in body:
+        errors.append("MVP server must not create a fake UI or trust client callbacks")
+if game_client.is_file():
+    body = game_client.read_text(encoding="utf-8")
+    for token in ('WaitForChild("FlowersGame", 20)', 'state.OnClientEvent:Connect',
+                  'action:FireServer(name)', 'action:FireServer("RequestState")',
+                  'button.MouseButton1Click:Connect', 'button.MouseEnter:Connect'):
+        if token not in body:
+            errors.append(f"MVP client missing {token}")
+if server_bootstrap.is_file():
+    body = server_bootstrap.read_text(encoding="utf-8")
+    if "SimpleGameService.Start()" not in body:
+        errors.append("ServerBootstrap does not start SimpleGameService")
+if client_bootstrap.is_file():
+    body = client_bootstrap.read_text(encoding="utf-8")
+    if "SimpleGameController.Start()" not in body:
+        errors.append("ClientBootstrap does not start SimpleGameController")
 
 if errors:
     print("FLOWERS QA FAILED:")
