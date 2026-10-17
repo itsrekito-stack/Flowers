@@ -369,11 +369,46 @@ if server_bootstrap.is_file():
     if "FlowerModelService.Start()" not in body or "FlowerGrowthService.Start()" in body:
         errors.append("FlowerModelService must start; legacy demo growth must stay disabled")
 
+# Persistence wiring contracts supplement executable tests of the actual modules.
+data_source = require("src/ServerScriptService/Services/DataService.luau").read_text(encoding="utf-8")
+schema_source = require("src/ServerScriptService/Services/ProfileSchema.luau").read_text(encoding="utf-8")
+game_source = game_server.read_text(encoding="utf-8")
+for token in ('DataService.StoreName = "Flowers_PlayerData"', 'DataService.AutosaveSeconds = 60',
+              'DataService.MaxAttempts = 4', 'pcall(callback)', 'store:UpdateAsync',
+              'if not handle.Writable then', 'old.session.token ~= handle.Token',
+              'old.session.expires <= now()', 'handle.Closing and not release'):
+    if token not in data_source:
+        errors.append(f"Persistence safety contract missing: {token}")
+for token in ('Schema.Version = 1', 'raw.schemaVersion ~= Schema.Version',
+              'rules.StartingHoney', 'rules.StartingSeeds', 'schema.Decode'):
+    if token not in schema_source:
+        errors.append(f"Profile schema contract missing: {token}")
+for token in ('data.Load(player.UserId)', 'game:BindToClose(function()',
+              'task.wait(DataService.AutosaveSeconds)', 'data.Save(p.Handle, saved, true)',
+              'player.Parent ~= Players', 'loading[player]', 'pendingSaves',
+              'Seeds = table.clone(p.Seeds)', 'else p.PendingPlant or false',
+              'createPlant(player, profile, plant.Id, plant.Level, plant.XP, plant.Seconds)'):
+    if token not in game_source:
+        errors.append(f"Persistence lifecycle contract missing: {token}")
+restore_body = game_source.split('local function createPlant(', 1)[1].split('local function spawnFlower(', 1)[0]
+if 'p.Seeds[' in restore_body or 'nearGarden(' in restore_body:
+    errors.append("Restoring a saved plant must not charge seeds or require a character")
+remove_body = game_source.split('local function removePlayer(', 1)[1].split('function GameService.Start()', 1)[0]
+if not (remove_body.index('profiles[player] = nil') < remove_body.index('snapshot(p)')
+        < remove_body.index('p.Plant:Destroy()') < remove_body.index('data.Save(')):
+    errors.append("Leave must freeze gameplay, snapshot, clean visuals, then save")
+try:
+    from test_persistence import run as test_persistence
+    test_persistence()
+except Exception as exc:
+    errors.append(f"Persistence behavioral tests failed: {exc}")
+
 if errors:
     print("FLOWERS QA FAILED:")
     for error in errors:
         print(" -", error)
     sys.exit(1)
 
-print("FLOWERS QA: PASS (catalogs, slot CFrame, inventory, authored UI, RoFlow)")
+print("FLOWERS QA: PASS (catalogs, slot CFrame, inventory, authored UI, RoFlow, persistence)")
 print("NOTE: Rojo build and Roblox Studio playtest must still be run.")
+
