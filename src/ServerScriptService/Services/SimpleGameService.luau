@@ -157,8 +157,10 @@ local function createPlant(player: Player, p: Profile, id: string, level: number
         return
     end
     local clone = source:Clone()
-    clone:ScaleTo(1 + seconds * Growth.GrowthPerSecond
-        + (level - 1) * Growth.BonusGrowthPerLevel)
+    local baseScale = source:GetScale()
+    clone:SetAttribute("BaseScale", baseScale)
+    clone:ScaleTo(baseScale * (1 + seconds * Growth.GrowthPerSecond
+        + (level - 1) * Growth.BonusGrowthPerLevel))
     local cf, size = clone:GetBoundingBox()
     local originalBottom = cf.Position.Y - size.Y / 2
     local delta = p.Plot.Position - Vector3.new(cf.Position.X, originalBottom, cf.Position.Z)
@@ -207,8 +209,9 @@ local function grow(p: Profile)
     end
     local cf, size = plant:GetBoundingBox()
     local oldBottom = cf.Position.Y - size.Y / 2
-    plant:ScaleTo(1 + p.Seconds * Growth.GrowthPerSecond
-        + (p.Level - 1) * Growth.BonusGrowthPerLevel)
+    local baseScale = plant:GetAttribute("BaseScale") :: number
+    plant:ScaleTo(baseScale * (1 + p.Seconds * Growth.GrowthPerSecond
+        + (p.Level - 1) * Growth.BonusGrowthPerLevel))
     local cf2, size2 = plant:GetBoundingBox()
     local newBottom = cf2.Position.Y - size2.Y / 2
     plant:PivotTo(plant:GetPivot() + Vector3.new(0, oldBottom - newBottom, 0))

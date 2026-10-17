@@ -4,7 +4,27 @@
     "$className": "DataModel",
     "Workspace": {
       "$className": "Workspace",
-      "$ignoreUnknownInstances": true
+      "$ignoreUnknownInstances": true,
+      "Garden": {
+        "$path": "src/Workspace/Garden.model.json",
+        "$ignoreUnknownInstances": true
+      },
+      "Flower": {
+        "$path": "src/Workspace/Flower.model.json",
+        "$ignoreUnknownInstances": true
+      },
+      "Bee": {
+        "$path": "src/Workspace/Bee.model.json",
+        "$ignoreUnknownInstances": true
+      },
+      "Baseplate": {
+        "$path": "src/Workspace/Baseplate.model.json",
+        "$ignoreUnknownInstances": true
+      },
+      "SpawnLocation": {
+        "$path": "src/Workspace/SpawnLocation.model.json",
+        "$ignoreUnknownInstances": true
+      }
     },
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",

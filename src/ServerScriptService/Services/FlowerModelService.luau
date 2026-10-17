@@ -71,7 +71,7 @@ local function recolor(model: Model, palette: {[string]: Color3})
             role = "Leaf"
         elseif name:find("petal") then
             role = "Petals"
-        elseif name == "innercircle" or name:find("center") or name:find("centre") then
+        elseif name == "innercircle" or name == "innercircles" or name:find("center") or name:find("centre") then
             role = "Center"
         elseif greenParts[part] then
             role = "Stem"

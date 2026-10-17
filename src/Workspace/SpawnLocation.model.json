@@ -1,0 +1,102 @@
+{
+  "ClassName": "SpawnLocation",
+  "Properties": {
+    "Anchored": true,
+    "CanCollide": true,
+    "CanTouch": true,
+    "CanQuery": true,
+    "CastShadow": true,
+    "CFrame": [
+      0.0,
+      -7.0,
+      0.0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "PivotOffset": [
+      0.0,
+      0.0,
+      0.0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "Size": [
+      12.0,
+      1.0,
+      12.0
+    ],
+    "Color": [
+      0.6392156862745098,
+      0.6352941176470588,
+      0.6470588235294118
+    ],
+    "Material": {
+      "Enum": 256
+    },
+    "MaterialVariant": "",
+    "Transparency": 0.0,
+    "Reflectance": 0.0,
+    "Locked": false,
+    "Massless": false,
+    "RootPriority": 0,
+    "CollisionGroup": "Default",
+    "TopSurface": {
+      "Enum": 0
+    },
+    "BottomSurface": {
+      "Enum": 0
+    },
+    "LeftSurface": {
+      "Enum": 0
+    },
+    "RightSurface": {
+      "Enum": 0
+    },
+    "FrontSurface": {
+      "Enum": 0
+    },
+    "BackSurface": {
+      "Enum": 0
+    },
+    "Enabled": true,
+    "Neutral": true,
+    "Duration": 0,
+    "AllowTeamChangeOnTouch": false,
+    "TeamColor": {
+      "BrickColor": 194
+    }
+  },
+  "Children": [
+    {
+      "ClassName": "Decal",
+      "Name": "Decal",
+      "Properties": {
+        "Texture": "rbxasset://textures/SpawnLocation.png",
+        "Face": {
+          "Enum": 1
+        },
+        "Color3": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "Transparency": 0.0,
+        "ZIndex": 1
+      }
+    }
+  ]
+}

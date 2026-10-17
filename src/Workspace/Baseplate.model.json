@@ -1,0 +1,102 @@
+{
+  "ClassName": "Part",
+  "Properties": {
+    "Anchored": true,
+    "CanCollide": true,
+    "CanTouch": true,
+    "CanQuery": true,
+    "CastShadow": true,
+    "CFrame": [
+      0.0,
+      -8.0,
+      0.0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "PivotOffset": [
+      0.0,
+      0.0,
+      0.0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "Size": [
+      2048.0,
+      2.0,
+      2048.0
+    ],
+    "Color": [
+      0.3568627450980392,
+      0.3568627450980392,
+      0.3568627450980392
+    ],
+    "Material": {
+      "Enum": 256
+    },
+    "MaterialVariant": "",
+    "Transparency": 0.0,
+    "Reflectance": 0.0,
+    "Locked": true,
+    "Massless": false,
+    "RootPriority": 0,
+    "CollisionGroup": "Default",
+    "TopSurface": {
+      "Enum": 0
+    },
+    "BottomSurface": {
+      "Enum": 0
+    },
+    "LeftSurface": {
+      "Enum": 0
+    },
+    "RightSurface": {
+      "Enum": 0
+    },
+    "FrontSurface": {
+      "Enum": 0
+    },
+    "BackSurface": {
+      "Enum": 0
+    },
+    "Shape": {
+      "Enum": 1
+    }
+  },
+  "Children": [
+    {
+      "ClassName": "Texture",
+      "Name": "Texture",
+      "Properties": {
+        "Texture": "rbxassetid://6372755229",
+        "Face": {
+          "Enum": 1
+        },
+        "Color3": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "Transparency": 0.800000011920929,
+        "StudsPerTileU": 8.0,
+        "StudsPerTileV": 8.0,
+        "OffsetStudsU": 0.0,
+        "OffsetStudsV": 0.0,
+        "ZIndex": 1
+      }
+    }
+  ]
+}
