@@ -32,8 +32,9 @@ The game uses `ReplicatedStorage/Models` for the three bees and flowers.
 At **Play start**, `FlowerModelService` reads your Studio-authored
 `Workspace.Flower` Model (including its `Circle`, `Circle.001`,
 `Circle2` meshes), keeps the original safely in `ServerStorage`,
-and replaces the temporary children of the three ReplicatedStorage
-flower models with **exact clones of your geometry**, recolored from
+and creates a complete **`ReplicatedStorage.Flower`** template copy.
+Daisy, Tulip and Sunflower in `ReplicatedStorage.Models.Flowers` are full
+clones of that template (including pivot, PrimaryPart and hierarchy), recolored from
 `FlowersConfig.Palette`. Those live Roblox models are then used for
 planting. The authored source appears in Workspace again after stopping Play.
 
@@ -167,3 +168,17 @@ the place. **No automated Studio Play test has been claimed.**
 
 See [Architecture](docs/ARCHITECTURE.md).
 
+
+### Authored flower template
+
+During Play, `Workspace.Flower` is duplicated into `ReplicatedStorage.Flower`.
+All three planted flower types use that geometry with their configured palettes.
+`InnerCircle` explicitly uses the dark Center palette. The untouched original
+is parked in ServerStorage during Play and returns on Stop. Template copying
+does not export the Studio asset into Git; clean-build world export remains stage 2.
+If an unrelated `ReplicatedStorage.Flower` already exists, copying is skipped with
+a warning rather than deleting the authored object.
+
+Manual check: Play with the authored Flower, inspect the template and three catalog
+models, plant each type, verify geometry/center colors, then Stop and verify the
+original Workspace model remains unchanged.

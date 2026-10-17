@@ -345,7 +345,8 @@ progress_client = require("src/StarterPlayer/StarterPlayerScripts/Controllers/Fl
 if model_service.is_file():
     body = model_service.read_text(encoding="utf-8")
     for token in ('workspace:FindFirstChild("Flower")', "source.Parent = ServerStorage",
-                  "target:ClearAllChildren()", "local copy = child:Clone()",
+                  'local template = source:Clone()', 'template.Parent = ReplicatedStorage',
+                  'local target = template:Clone()', 'name == "innercircle"',
                   "recolor(target, definition.Palette)", "SurfaceAppearance"):
         if token not in body:
             errors.append(f"Runtime custom Flower cloning missing: {token}")
