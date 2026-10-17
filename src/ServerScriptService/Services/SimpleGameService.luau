@@ -56,10 +56,11 @@ local function plotPositions(): {CFrame}
     for _, entry in numbered do
         local object = entry.object
         if object:IsA("BasePart") then
-            table.insert(result, object.Position + Vector3.new(0, object.Size.Y / 2, 0))
+            -- Keep slot orientation and height together: Profile.Plot is a CFrame.
+            table.insert(result, object.CFrame * CFrame.new(0, object.Size.Y / 2, 0))
         elseif object:IsA("Model") and object:FindFirstChildWhichIsA("BasePart", true) then
             local bounds, size = object:GetBoundingBox()
-            table.insert(result, bounds.Position + Vector3.new(0, size.Y / 2, 0))
+            table.insert(result, bounds * CFrame.new(0, size.Y / 2, 0))
         end
     end
     return result
@@ -256,14 +257,30 @@ local function rollBee(player: Player, p: Profile, now: number)
     p.Message = "New bee unlocked: " .. definition.DisplayName .. "!"
 end
 
-local function onAction(player: Player, command: any, extra: any)
-    -- Never trust user-supplied IDs, costs, quantities or ownership.
-    if typeof(command) ~= "string" or extra ~= nil then return end
+local function onAction(player: Player, command: any, extra: any, ...: any)
+    -- Every mutation is server-validated: fixed action, ID, ownership and rate.
+    if typeof(command) ~= "string" or #command > 32 or select("#", ...) > 0 then return end
+    local isSelect = command == "SelectFlower"
+    local isEquip = command == "EquipBee"
+    if isSelect or isEquip then
+        if typeof(extra) ~= "string" or #extra > 40 then return end
+        if isSelect and not Flowers.ById[extra] then return end
+        if isEquip and not Bees.ById[extra] then return end
+    elseif extra ~= nil then
+        return
+    end
+    if command ~= "RequestState" and command ~= "RollFlower"
+        and command ~= "RollBee" and command ~= "Plant"
+        and command ~= "Harvest" and not isSelect and not isEquip then
+        return
+    end
+
     local p = profiles[player]
     if not p then return end
     local now = os.clock()
     if now - p.LastAction < Rules.ActionCooldown then return end
     p.LastAction = now
+
     if command == "RequestState" then
         send(player, p)
         return
@@ -275,8 +292,26 @@ local function onAction(player: Player, command: any, extra: any)
         spawnFlower(player, p)
     elseif command == "Harvest" then
         harvest(player, p)
-    else
-        return
+    elseif isSelect then
+        local flowerId = extra :: string
+        if (p.Seeds[flowerId] or 0) > 0 then
+            p.Selected = flowerId
+            p.Message = "Selected " .. Flowers.ById[flowerId].DisplayName .. " seed."
+        else
+            p.Message = "You do not own that seed."
+        end
+    elseif isEquip then
+        local beeId = extra :: string
+        if p.Bees[beeId] == true then
+            if p.BeeId ~= beeId then
+                p.BeeId = beeId
+                player:SetAttribute("EquippedBeeId", beeId)
+                BeeFollower.Refresh(player)
+            end
+            p.Message = "Equipped " .. Bees.ById[beeId].DisplayName .. "."
+        else
+            p.Message = "Bee is locked."
+        end
     end
     send(player, p)
 end

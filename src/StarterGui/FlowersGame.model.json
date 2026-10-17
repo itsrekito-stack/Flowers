@@ -520,7 +520,7 @@
               "UDim2": [
                 [
                   0,
-                  664
+                  800
                 ],
                 [
                   0,
@@ -570,7 +570,7 @@
                   "UDim2": [
                     [
                       0,
-                      12
+                      10
                     ],
                     [
                       0,
@@ -643,7 +643,7 @@
                   "UDim2": [
                     [
                       0,
-                      172
+                      168
                     ],
                     [
                       0,
@@ -716,7 +716,7 @@
                   "UDim2": [
                     [
                       0,
-                      332
+                      326
                     ],
                     [
                       0,
@@ -789,7 +789,7 @@
                   "UDim2": [
                     [
                       0,
-                      492
+                      484
                     ],
                     [
                       0,
@@ -850,6 +850,77 @@
                     ],
                     "Transparency": 0.22,
                     "Thickness": 1.2
+                  }
+                }
+              ]
+            },
+            {
+              "ClassName": "TextButton",
+              "Name": "InventoryButton",
+              "Properties": {
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      642
+                    ],
+                    [
+                      0,
+                      10
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      148
+                    ],
+                    [
+                      0,
+                      48
+                    ]
+                  ]
+                },
+                "BackgroundColor3": [
+                  0.29,
+                  0.23,
+                  0.12
+                ],
+                "BorderSizePixel": 0,
+                "AutoButtonColor": false,
+                "Text": "INVENTORY",
+                "Font": "GothamBold",
+                "TextSize": 13,
+                "TextColor3": [
+                  1,
+                  0.86,
+                  0.58
+                ]
+              },
+              "Children": [
+                {
+                  "ClassName": "UICorner",
+                  "Name": "Corners",
+                  "Properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        10
+                      ]
+                    }
+                  }
+                },
+                {
+                  "ClassName": "UIStroke",
+                  "Name": "Border",
+                  "Properties": {
+                    "Color": [
+                      0.77,
+                      0.6,
+                      0.27
+                    ],
+                    "Thickness": 1.3
                   }
                 }
               ]
