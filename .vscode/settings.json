@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "*.luau": "luau"
+  },
+  "[luau]": {
+    "editor.defaultFormatter": "JohnnyMorganz.stylua",
+    "editor.formatOnSave": true
+  },
+  "editor.formatOnSave": true
+}
