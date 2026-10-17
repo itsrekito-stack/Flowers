@@ -161,7 +161,7 @@ for flower_id, model_name in (
         errors.append(f"{model_name} differs in geometry from the shared temporary flower shape")
 
     match = re.search(
-        rf"\\b{flower_id}\\s*=\\s*\\{{(?P<definition>.*?)\\n\\s*\\}},",
+        rf"\b{flower_id}\s*=\s*\{{(?P<definition>.*?)\n\s*\}},",
         registry_source, re.DOTALL
     )
     if not match:
@@ -170,7 +170,7 @@ for flower_id, model_name in (
     colors = {
         color_name: tuple(int(channel) for channel in channels)
         for color_name, *channels in re.findall(
-            r"(Petals|Center|Stem|Leaf)\\s*=\\s*Color3\\.fromRGB\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)",
+            r"(Petals|Center|Stem|Leaf)\s*=\s*Color3\.fromRGB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
             match.group("definition")
         )
     }
