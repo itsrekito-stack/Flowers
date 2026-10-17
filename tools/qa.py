@@ -144,8 +144,8 @@ def descendants(node):
 
 buttons = {item.get("Name"): item for item in descendants(game_ui)
            if item.get("ClassName") == "TextButton"}
-if sorted(buttons) != ["Harvest", "Plant", "RollBee", "RollFlower"]:
-    errors.append("Game HUD must contain four functional TextButtons")
+if sorted(buttons) != ["Harvest", "InventoryButton", "Plant", "RollBee", "RollFlower"]:
+    errors.append("Game HUD must contain four server actions and an inventory launcher")
 
 if game_remotes.get("ClassName") != "Folder":
     errors.append("FlowerGameRemotes must be a Folder")
