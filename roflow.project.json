@@ -15,6 +15,12 @@
       "iconAssetId": ""
     },
     {
+      "id": "inventory",
+      "label": "Inventory",
+      "root": "InventoryPanel",
+      "modelPath": "src/StarterGui/FlowersInventory.model.json"
+    },
+    {
       "id": "flower_hud",
       "label": "Flower HUD",
       "root": "FlowerStatus",

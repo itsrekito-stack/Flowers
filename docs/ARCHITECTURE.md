@@ -36,15 +36,21 @@
 - `SimpleGameService` is the only authority for rolling, spending Honey,
   seed counts, bee unlocks, planting, XP, growth and harvest rewards.
 - `GameConfig` centralizes costs, XP multipliers, distance limits and timing.
-- `FlowerGameRemotes/Action` accepts only fixed command strings
-  `RequestState`, `RollFlower`, `RollBee`, `Plant`, `Harvest`. It
+- `FlowerGameRemotes/Action` accepts fixed command strings
+  `RequestState`, `RollFlower`, `RollBee`, `Plant`, `Harvest`,
+  `SelectFlower(id)`, and `EquipBee(id)`. IDs are strictly validated
+  against the corresponding config, owned seeds or unlocked bees, and
+  command cooldowns; the client cannot mint inventory items. It
   rejects additional arguments and rate-limits actions. No client-supplied
   cost, reward, ID or quantity is trusted.
 - `FlowerGameRemotes/State` only replicates filtered per-player session data.
-- `SimpleGameController` binds `FlowersGame.model.json` (all real Roblox
-  ScreenGui GUI instances); no runtime-generated UI components.
+- `SimpleGameController` binds `FlowersGame.model.json`; 
+  `InventoryController` binds `FlowersInventory.model.json`. Inventory
+  uses six authored Roblox cards and category tabs, is hidden on entry, and
+  reflects locked, available, selected, owned and equipped states.
+  No runtime-generated GUI components.
 - The server assigns each player one authored `Garden.Slots.SlotN` placement
-  sorted by numeric suffix if available, otherwise generates a fallback plot. It places and
+  sorted by numeric suffix if available, otherwise generates a fallback plot. `plotPositions` returns CFrame instances, matching `Profile.Plot` and fixing the previous invalid `Vector3.Position` access. It places and
   cleans up at most one growing flower per player under `FlowersGameWorld`.
 - `BeeFollowerService.Refresh` switches the existing follower's model only
   when the server unlocks a rarer bee.

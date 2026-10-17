@@ -35,6 +35,13 @@
       "title": "Verify 3 bees and 3 flowers in ReplicatedStorage",
       "detail": "After AI SYNC check ReplicatedStorage.Models.Bees/Flowers each has 3 editable source-controlled Roblox Models, and Bee follower uses WorkerBee if Workspace.Bee is absent. Test in Studio.",
       "done": false
+    },
+    {
+      "id": "flowers-inventory-playtest",
+      "group": "Inventory / QA",
+      "title": "Test Inventory and planting in Studio",
+      "detail": "Play: open inventory, select different owned flower seed, plant into Garden.Slots.Slot1 without Vector3.Position error, equip owned bee, verify LOCKED/OWNED/SELECTED states, close via X/Escape. Run two-player test and 1280x720 viewport.",
+      "done": false
     }
   ],
   "roadmap": [

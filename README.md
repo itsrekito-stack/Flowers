@@ -23,8 +23,9 @@ Install **Rojo CLI** and the **Rojo Studio plugin** before running `serve.ps1`. 
 1. Connect Rojo and press **Play**. A server-owned Worker Bee follows you.
 2. Walk near your garden plot. The game gives you one **Daisy seed** and **30 Honey**.
 3. Press **PLANT**. Your flower grows and earns XP every second.
-4. At flower **Level 3**, press **HARVEST** to earn Honey.
-5. Spend Honey on **ROLL FLOWER** (8) or **ROLL BEE** (18).
+4. Open **INVENTORY** to select which flower seed to plant or equip a bee you have unlocked. This is a real authored ScreenGui with six individually editable cards and **Flowers**/**Bees** tabs.
+5. At flower **Level 3**, press **HARVEST** to earn Honey.
+6. Spend Honey on **ROLL FLOWER** (8) or **ROLL BEE** (18).
    A rare bee equips automatically and grows flowers faster.
 
 The game uses `ReplicatedStorage/Models` for the three bees and flowers.
@@ -37,13 +38,13 @@ flower models with **exact clones of your geometry**, recolored from
 planting. The authored source appears in Workspace again after stopping Play.
 
 The automatically assigned garden plots are read exclusively from
-`Workspace.Garden.Slots.Slot1`, `Slot2`, etc., sorted by slot number.
+`Workspace.Garden.Slots.Slot1`, `Slot2`, etc., sorted by slot number. The plot position and rotation are preserved as a CFrame (not Vector3).
 One occupied slot is reserved per player in this MVP. A model is
 positioned with its lowest bounds exactly on the slot's top surface;
 the slots themselves are never moved or replaced.
 
 UI is authored in `StarterGui/FlowersGame.model.json` and
-editable in RoFlow **Game HUD**. Garden slots in `Workspace.Garden.Slots`
+editable in RoFlow **Game HUD** and **Inventory** states. Inventory launches from the dock and can close via X, Escape or a second click; locked/owned/selected/equipped states are driven by server data. Garden slots in `Workspace.Garden.Slots`
 are used when available; otherwise a small temporary field is generated
 near SpawnLocation. No authored Garden/Flower/Bee instance is permanently deleted. The old
 `Workspace.Flower` demo growth is disabled so it no longer duplicates
