@@ -1,0 +1,19 @@
+﻿# Generated Roblox Studio places and temporary files
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxm.lock
+
+# Local app state, logs and recovery
+.roflow/
+.recovery/
+*.log
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local CLI executables
+rojo.exe
