@@ -36,19 +36,30 @@ local generatedPads: {[number]: BasePart} = {}
 local world: Folder
 local rng = Random.new()
 
+-- Only authored Slot1, Slot2, ... are planting spots.
+-- Sort numerically so Slot10 follows Slot9, not Slot1.
 local function plotPositions(): {CFrame}
     local result = {}
     local garden = workspace:FindFirstChild("Garden")
     local slots = garden and garden:FindFirstChild("Slots")
     if not slots then return result end
-    local children = slots:GetChildren()
-    table.sort(children, function(a, b) return a.Name < b.Name end)
-    for _, part in children do
-        if part:IsA("BasePart") then
-            table.insert(result, part.CFrame + Vector3.new(0, part.Size.Y / 2, 0))
-        elseif part:IsA("Model") and part:FindFirstChildWhichIsA("BasePart", true) then
-            local cf, size = part:GetBoundingBox()
-            table.insert(result, cf + Vector3.new(0, size.Y / 2, 0))
+
+    local numbered = {}
+    for _, instance in slots:GetChildren() do
+        local number = instance.Name:match("^Slot(%d+)$")
+        if number and (instance:IsA("BasePart") or instance:IsA("Model")) then
+            table.insert(numbered, { number = tonumber(number), object = instance })
+        end
+    end
+    table.sort(numbered, function(a, b) return a.number < b.number end)
+
+    for _, entry in numbered do
+        local object = entry.object
+        if object:IsA("BasePart") then
+            table.insert(result, object.Position + Vector3.new(0, object.Size.Y / 2, 0))
+        elseif object:IsA("Model") and object:FindFirstChildWhichIsA("BasePart", true) then
+            local bounds, size = object:GetBoundingBox()
+            table.insert(result, bounds.Position + Vector3.new(0, size.Y / 2, 0))
         end
     end
     return result
@@ -146,6 +157,7 @@ local function spawnFlower(player: Player, p: Profile)
     clone.Name = "Growing_" .. tostring(player.UserId)
     clone:SetAttribute("OwnerUserId", player.UserId)
     clone:SetAttribute("FlowerId", p.Selected)
+    clone:SetAttribute("SlotIndex", p.Slot)
     clone:SetAttribute("Level", 1)
     clone:SetAttribute("Experience", 0)
     clone:SetAttribute("RequiredExperience", xpNeeded(1))
@@ -169,10 +181,6 @@ local function grow(p: Profile)
         p.XP -= xpNeeded(p.Level)
         p.Level += 1
     end
-    plant:SetAttribute("Level", p.Level)
-    plant:SetAttribute("Experience", p.XP)
-    plant:SetAttribute("RequiredExperience", xpNeeded(p.Level))
-
     local cf, size = plant:GetBoundingBox()
     local oldBottom = cf.Position.Y - size.Y / 2
     plant:ScaleTo(1 + p.Seconds * Growth.GrowthPerSecond
@@ -180,6 +188,11 @@ local function grow(p: Profile)
     local cf2, size2 = plant:GetBoundingBox()
     local newBottom = cf2.Position.Y - size2.Y / 2
     plant:PivotTo(plant:GetPivot() + Vector3.new(0, oldBottom - newBottom, 0))
+
+    -- Publish after moving the mesh so BillboardGui offsets use new bounds.
+    plant:SetAttribute("Level", p.Level)
+    plant:SetAttribute("Experience", p.XP)
+    plant:SetAttribute("RequiredExperience", xpNeeded(p.Level))
 end
 
 local function harvest(player: Player, p: Profile)
