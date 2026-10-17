@@ -32,6 +32,7 @@ local GameService = {}
 local started = false
 local profiles: {[Player]: Profile} = {}
 local occupied: {[number]: boolean} = {}
+local generatedPads: {[number]: BasePart} = {}
 local world: Folder
 local rng = Random.new()
 
@@ -62,9 +63,13 @@ local function allocatePlot(): (number, CFrame)
 
     -- No authored garden? Add a small visible plot without deleting Studio art.
     local spawn = workspace:FindFirstChildWhichIsA("SpawnLocation")
-    local position = (if spawn then spawn.Position else Vector3.new(0, 3, 0))
-        + Vector3.new(12 + ((index - 1) % 4) * 5.5, -2.5,
-            10 + math.floor((index - 1) / 4) * 5.5)
+    local origin = if spawn then spawn.Position else Vector3.new(0, 0, 0)
+    local groundY = if spawn then spawn.Position.Y - spawn.Size.Y / 2 else 0
+    local position = Vector3.new(
+        origin.X + 12 + ((index - 1) % 4) * 5.5,
+        groundY + 0.25,
+        origin.Z + 10 + math.floor((index - 1) / 4) * 5.5
+    )
     local pad = Instance.new("Part")
     pad.Name = "Plot_" .. tostring(index)
     pad.Size = Vector3.new(4.5, 0.5, 4.5)
@@ -73,6 +78,7 @@ local function allocatePlot(): (number, CFrame)
     pad.Material = Enum.Material.Ground
     pad.Anchored = true
     pad.Parent = world
+    generatedPads[index] = pad
     return index, pad.CFrame + Vector3.new(0, pad.Size.Y / 2, 0)
 end
 
@@ -299,6 +305,11 @@ function GameService.Start()
         if not p then return end
         if p.Plant then p.Plant:Destroy() end
         occupied[p.Slot] = nil
+        local generated = generatedPads[p.Slot]
+        if generated then
+            generated:Destroy()
+            generatedPads[p.Slot] = nil
+        end
         profiles[player] = nil
     end)
     for _, player in Players:GetPlayers() do addPlayer(player) end
