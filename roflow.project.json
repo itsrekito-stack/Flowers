@@ -8,6 +8,13 @@
   "releaseGateTaskIds": [],
   "uiStates": [
     {
+      "id": "game",
+      "label": "Game HUD",
+      "root": "GamePanel",
+      "modelPath": "src/StarterGui/FlowersGame.model.json",
+      "iconAssetId": ""
+    },
+    {
       "id": "flower_hud",
       "label": "Flower HUD",
       "root": "FlowerStatus",
