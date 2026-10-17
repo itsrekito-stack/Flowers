@@ -7,19 +7,19 @@
 - `.roflow/` is machine-local app state and must not be committed.
 
 ## Boundaries
-- **Server**: `FlowerGrowthService` awards XP, computes level-ups and applies model growth; all progression attributes originate here.
+- **Server**: `SimpleGameService` awards XP, computes level-ups and applies growth to planted flowers; the legacy `FlowerGrowthService` demo is no longer started.
 - **Shared config**: `ReplicatedStorage/Config/FlowerConfig` contains tunable rules.
-- **Client**: `FlowerProgressController` binds the existing authored BillboardGui to the flower and renders replicated attributes.
-- **UI**: `src/StarterGui/FlowerProgress.model.json` is the editable overhead BillboardGui; `src/StarterGui/FlowersHUD.model.json` is the authored ScreenGui status HUD supported by RoFlow UI Studio. Both bind to the same server attributes.
+- **Client**: `FlowerProgressController` binds the authored BillboardGui to the local player's planted flower and renders replicated level/XP attributes.
+- **UI**: `src/StarterGui/FlowerProgress.model.json` is the editable overhead BillboardGui; `FlowersGame.model.json` is the active ScreenGui status HUD. Redundant `FlowersHUD.model.json` remains editable for future use but is not enabled.
 - **World**: Studio's manually placed `Workspace.Flower` Model is preserved during Rojo sync by `$ignoreUnknownInstances`.
 
 ## Source-controlled starter content
 
 - `src/ReplicatedStorage/Config/BeesConfig.luau` defines 3 bee types and starter ID; `FlowersConfig.luau` defines 3 flower types. These are metadata, not reward logic.
 - `src/ReplicatedStorage/Models/Bees/*.model.json` and `Models/Flowers/*.model.json` contain 6 real editable Roblox part models, not thumbnails or scripts.
-- **Temporary flower art**: the three source-controlled flower models have identical part geometry (copied from Daisy), with distinct petal/center colors. Palettes are stored in `FlowersConfig.ById[flowerId].Palette`. When Blender models arrive, replace the corresponding Rojo model assets without changing catalog ID or ModelName. No active scripts repaint custom MeshParts automatically.
+- **Runtime authored Flower copies**: `FlowerModelService` clones the geometry of `Workspace.Flower` into the existing Daisy/Tulip/Sunflower catalog Models during Play and applies palettes from `FlowersConfig.ById[flowerId].Palette`. The original Flower is temporarily kept in ServerStorage, untouched. The committed generic Parts are fallback prototypes; to persist custom geometry across blank builds it still needs exporting to Git.
 - The first live companion is the catalog's WorkerBee except when an authored `Workspace.Bee` exists. The original Studio bee always takes precedence to avoid replacing existing art.
-- `Workspace.Flower` is still the shared growing demo; no automatic planting/inventory ownership is claimed by this change.
+- The original `Workspace.Flower` is the source template, not an extra growing demo plant.
 
 ## Bee Companion (first visual pet)
 
@@ -43,13 +43,13 @@
 - `FlowerGameRemotes/State` only replicates filtered per-player session data.
 - `SimpleGameController` binds `FlowersGame.model.json` (all real Roblox
   ScreenGui GUI instances); no runtime-generated UI components.
-- The server assigns each player one authored `Garden.Slots` placement
-  if available, otherwise generates a simple fallback plot. It places and
+- The server assigns each player one authored `Garden.Slots.SlotN` placement
+  sorted by numeric suffix if available, otherwise generates a fallback plot. It places and
   cleans up at most one growing flower per player under `FlowersGameWorld`.
 - `BeeFollowerService.Refresh` switches the existing follower's model only
   when the server unlocks a rarer bee.
-- Current player progression is **session-only**, not saved. Existing
-  `Workspace.Flower` demonstration remains separate from player plants.
+- Current player progression is **session-only**, not saved. The old shared
+  `Workspace.Flower` growth service no longer runs; all XP belongs to real planted flowers.
 
 ## Important limitations before expanding
 - The flower's progression is **shared per server**, not persisted and not tied to a player profile. Do not represent it as save-enabled.
