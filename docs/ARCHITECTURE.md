@@ -15,7 +15,7 @@
 
 ## Bee Companion (first visual pet)
 
-- `BeeFollowerService` runs on the server, creates exactly one `Bee_<UserId>` per character in `Workspace.BeeCompanions`, and moves it on a throttled Heartbeat.
+- `BeeFollowerService` runs on the server, creates exactly one `Bee_<UserId>` per character in `Workspace.BeeCompanions`, and smoothly follows a character-local behind/side offset on a throttled Heartbeat. The bee faces toward the character; physical facing comes from the authored Sting-to-MainPart vector.
 - `BeeFollowerConfig` is the only place for orbit/smoothing/bobbing numbers.
 - The artist-authored `Workspace.Bee` template is moved to `ServerStorage` **at runtime only** so it is not visible as an extra stationary bee.
 - No RemoteEvent controls followers; no client ownership or inventory claims are implemented yet.

@@ -1,6 +1,6 @@
 --!strict
--- Clones the artist-authored Workspace.Bee for each player and orbits it
--- around their character. Server-owned so every player can see companions.
+-- Clones the artist-authored Workspace.Bee for each player and follows
+-- behind their character. Server-owned so every player sees companions.
 -- The original model moves to ServerStorage at runtime; it remains in
 -- Workspace in Studio edit mode and is never overwritten by Rojo.
 local Players = game:GetService("Players")
@@ -14,8 +14,8 @@ type Follower = {
     model: Model,
     root: BasePart,
     position: Vector3,
-    spawnTime: number,
     phase: number,
+    headingCorrection: number,
 }
 
 local BeeFollowerService = {}
@@ -95,22 +95,47 @@ local function prepareVisual(model: Model)
     end
 end
 
-local function orbitPosition(root: BasePart, angle: number, timeNow: number, phase: number): Vector3
-    return root.Position + Vector3.new(
-        math.cos(angle) * Config.OrbitRadius,
-        Config.OrbitHeight + math.sin(timeNow * Config.BobSpeed + phase) * Config.BobAmplitude,
-        math.sin(angle) * Config.OrbitRadius
+-- Positive local Z is behind a Roblox character (LookVector is local -Z).
+-- The target follows the player's facing direction instead of orbiting them.
+local function followPosition(root: BasePart, timeNow: number, phase: number): Vector3
+    local offset = Vector3.new(
+        Config.SideOffset,
+        Config.FollowHeight + math.sin(timeNow * Config.BobSpeed + phase) * Config.BobAmplitude,
+        Config.BehindDistance
     )
+    return root.CFrame:PointToWorldSpace(offset)
 end
 
-local function orbitCFrame(position: Vector3, angle: number, timeNow: number): CFrame
-    local tangent = Vector3.new(-math.sin(angle), 0, math.cos(angle))
-    return CFrame.lookAt(position, position + tangent)
-        * CFrame.Angles(
-            0,
-            math.rad(Config.HeadingOffsetDegrees),
-            math.rad(Config.BankDegrees) * math.sin(timeNow * Config.OrbitAngularSpeed)
-        )
+-- The bee's sting marks its BACK. Determine the facing direction from the
+-- authored MainPart and Sting, not from an arbitrary Model pivot rotation.
+-- This works even if the model was constructed sideways in Studio.
+local function headingFromSting(model: Model): number
+    local body = model:FindFirstChild("MainPart", true)
+    local sting = model:FindFirstChild("Sting", true)
+    local manualOffset = math.rad(Config.HeadingOffsetDegrees)
+
+    if body and body:IsA("BasePart") and sting and sting:IsA("BasePart") then
+        local localForward = model:GetPivot():VectorToObjectSpace(body.Position - sting.Position)
+        if Vector3.new(localForward.X, 0, localForward.Z).Magnitude > 0.05 then
+            -- Align the sting-to-body vector with the canonical -Z LookVector.
+            return math.atan2(localForward.X, -localForward.Z) + manualOffset
+        end
+    end
+
+    warn("[Flowers/Bee] Could not infer facing from MainPart and Sting; using HeadingOffsetDegrees.")
+    return manualOffset
+end
+
+local function followCFrame(
+    root: BasePart,
+    position: Vector3,
+    timeNow: number,
+    correction: number
+): CFrame
+    -- Stay level while looking horizontally toward the player.
+    local focus = Vector3.new(root.Position.X, position.Y, root.Position.Z)
+    local bank = math.rad(Config.BankDegrees) * math.sin(timeNow * Config.BankSpeed)
+    return CFrame.lookAt(position, focus) * CFrame.Angles(0, correction, bank)
 end
 
 local function spawnForCharacter(player: Player, character: Model)
@@ -144,17 +169,17 @@ local function spawnForCharacter(player: Player, character: Model)
     prepareVisual(clone)
 
     local phase = (player.UserId % 31) / 31 * math.pi * 2
-    local angle = phase
-    local position = orbitPosition(rootCandidate, angle, simulationTime, phase)
-    clone:PivotTo(orbitCFrame(position, angle, simulationTime))
+    local headingCorrection = headingFromSting(clone)
+    local position = followPosition(rootCandidate, simulationTime, phase)
+    clone:PivotTo(followCFrame(rootCandidate, position, simulationTime, headingCorrection))
     clone.Parent = ensureFolder()
 
     followers[player] = {
         model = clone,
         root = rootCandidate,
         position = position,
-        spawnTime = simulationTime,
         phase = phase,
+        headingCorrection = headingCorrection,
     }
 end
 
@@ -187,8 +212,7 @@ local function updateFollower(player: Player, follower: Follower, timeNow: numbe
         return
     end
 
-    local angle = follower.phase + (timeNow - follower.spawnTime) * Config.OrbitAngularSpeed
-    local target = orbitPosition(follower.root, angle, timeNow, follower.phase)
+    local target = followPosition(follower.root, timeNow, follower.phase)
 
     if (target - follower.position).Magnitude > Config.TeleportSnapDistance then
         follower.position = target
@@ -197,7 +221,9 @@ local function updateFollower(player: Player, follower: Follower, timeNow: numbe
         follower.position = follower.position:Lerp(target, alpha)
     end
 
-    follower.model:PivotTo(orbitCFrame(follower.position, angle, timeNow))
+    follower.model:PivotTo(
+        followCFrame(follower.root, follower.position, timeNow, follower.headingCorrection)
+    )
 end
 
 function BeeFollowerService.Start()

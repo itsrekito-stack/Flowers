@@ -35,11 +35,11 @@ This is a **starter implementation**, not persistence. The overhead BillboardGui
 Place your existing **Model** called `Bee` directly in `Workspace` in Studio, with `MainPart`, `Sting`, `Wings` inside. The runtime server service moves that authoring model to `ServerStorage` while Play is running, clones one Bee per player into `Workspace.BeeCompanions`, and moves every cloned part together. When you stop Play, the original Bee is still in its Studio edit position.
 
 - Automatically spawns when a character loads and respawns after death; cleans up when the player leaves.
-- Flies in a circular orbit, gently bobs and banks. It follows player movement smoothly and snaps after teleports.
+- Flies **behind the character** (slightly to the side), gently bobs and banks, and faces **toward the player** rather than circling around them. It follows player movement smoothly and snaps after teleports.
 - Collision, touch, query and shadow are disabled on cloned visual parts; their authored relative positions are preserved.
 - Other players can see the companions because movement is controlled by the server.
-- Tune radius, height, speed, tilt and smoothing in `src/ReplicatedStorage/Config/BeeFollowerConfig.luau`.
-- If the bee faces sideways, adjust `HeadingOffsetDegrees` in that config.
+- Tune back/side distance, height, tilt and smoothing in `src/ReplicatedStorage/Config/BeeFollowerConfig.luau`.
+- Orientation is inferred from the authored `MainPart` and `Sting` positions (sting = rear), even when the Model pivot points sideways. If that geometry is ambiguous, the `HeadingOffsetDegrees` setting is a manual override.
 
 **The 3D model is still Studio-only.** Rojo preserves it during live sync; this repo cannot export an existing Workspace model automatically. Keep the Studio place backed up. A fresh `rojo build` without the model cannot display the bee until you insert one.
 

@@ -1,18 +1,24 @@
 --!strict
--- One visible companion per character; edit these values to tune flight.
+-- Companion follows behind the character, with its FRONT turned toward the player.
 local BeeFollowerConfig = {
     TemplateName = "Bee",
     CompanionsFolderName = "BeeCompanions",
 
-    OrbitRadius = 3.6,            -- Studs from the player's HumanoidRootPart
-    OrbitHeight = 2.1,            -- Studs above HumanoidRootPart
-    OrbitAngularSpeed = 0.85,     -- Radians per second
-    BobAmplitude = 0.35,         -- Up/down flight motion
-    BobSpeed = 2.5,              -- Radians per second
-    FollowResponsiveness = 10,   -- How quickly the bee catches up
-    TeleportSnapDistance = 35,   -- Immediately snap after long teleports
-    BankDegrees = 8,            -- Gentle tilt in turns
-    HeadingOffsetDegrees = 0,    -- Adjust if the authored model faces sideways
+    -- Roblox character local +Z points behind their back.
+    BehindDistance = 3.2,
+    SideOffset = -1.5,
+    FollowHeight = 2.0,
+
+    BobAmplitude = 0.22,
+    BobSpeed = 2.5,
+    FollowResponsiveness = 10,
+    TeleportSnapDistance = 35,
+    BankDegrees = 4,
+    BankSpeed = 2,
+
+    -- Only needed if the authored Sting/MainPart positions don't match
+    -- the desired visual front direction (try 180 for a reversed model).
+    HeadingOffsetDegrees = 0,
     UpdateInterval = 1 / 30,
 }
 

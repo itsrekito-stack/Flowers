@@ -97,6 +97,33 @@ if follower_service.is_file():
         if expected not in bee_source:
             errors.append(f"Bee follower missing lifecycle/visual contract: {expected}")
 
+    # Companion should follow a character-local +Z offset, not an orbital tangent.
+    for expected in (
+        "root.CFrame:PointToWorldSpace(offset)",
+        "Config.BehindDistance",
+        "Config.SideOffset",
+        "headingFromSting(clone)",
+        'model:FindFirstChild("MainPart", true)',
+        'model:FindFirstChild("Sting", true)',
+        "CFrame.lookAt(position, focus)",
+        "follower.headingCorrection",
+        "math.exp(-Config.FollowResponsiveness * step)",
+    ):
+        if expected not in bee_source:
+            errors.append(f"Bee follow/facing regression: missing {expected}")
+    for forbidden in ("orbitPosition(", "orbitCFrame(", "Config.OrbitAngularSpeed"):
+        if forbidden in bee_source:
+            errors.append(f"Old bee orbit code still active: {forbidden}")
+
+bee_config = require("src/ReplicatedStorage/Config/BeeFollowerConfig.luau")
+if bee_config.is_file():
+    config_source = bee_config.read_text(encoding="utf-8")
+    for expected in ("BehindDistance", "SideOffset", "FollowHeight", "HeadingOffsetDegrees"):
+        if expected not in config_source:
+            errors.append(f"Bee follow config missing {expected}")
+    if "OrbitAngularSpeed" in config_source:
+        errors.append("Bee config must not use orbit angular speed")
+
 if errors:
     print("FLOWERS QA FAILED:")
     for error in errors:

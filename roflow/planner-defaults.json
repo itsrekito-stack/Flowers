@@ -26,7 +26,7 @@
       "id": "flowers-bee-companion-runtime",
       "group": "Bee / QA",
       "title": "Verify follower bee in Roblox Studio multiplayer",
-      "detail": "Confirm Workspace.Bee becomes the template; companion orbits each live player, parts stay aligned, original is hidden during Play, respawn/leave cleanup works.",
+      "detail": "Confirm Workspace.Bee becomes the template; follower stays behind the character, faces toward player using MainPart/Sting, preserves part alignment, responds to turns/teleports and cleans up on respawn/leave.",
       "done": false
     }
   ],
