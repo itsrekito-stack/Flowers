@@ -18,6 +18,26 @@ Install **Rojo CLI** and the **Rojo Studio plugin** before running `serve.ps1`. 
 
 **AI SYNC:** once RoFlow points at this local project, GitHub updates are pulled into the folder. Rojo must also be connected to apply file changes to Studio. Do not force-pull over unsaved local edits.
 
+## Playable MVP — how to play
+
+1. Connect Rojo and press **Play**. A server-owned Worker Bee follows you.
+2. Walk near your garden plot. The game gives you one **Daisy seed** and **30 Honey**.
+3. Press **PLANT**. Your flower grows and earns XP every second.
+4. At flower **Level 3**, press **HARVEST** to earn Honey.
+5. Spend Honey on **ROLL FLOWER** (8) or **ROLL BEE** (18).
+   A rare bee equips automatically and grows flowers faster.
+
+The game uses `ReplicatedStorage/Models` for the 3 bee and 3 flower
+templates. UI is authored in `StarterGui/FlowersGame.model.json` and
+editable in RoFlow **Game HUD**. Garden slots in `Workspace.Garden.Slots`
+are used when available; otherwise a small temporary field is generated
+near SpawnLocation. No authored Garden/Flower/Bee instance is deleted.
+
+Important MVP limitation: **Honey, seeds, unlocked bees and planted flowers
+are session-only**, reset on rejoin and server restart. No DataStore is
+implemented yet. The 1/n entries are relative roll weights, not guaranteed
+independent probabilities. Multiplayer players each get one reserved plot.
+
 ## Current demo
 
 Put an editable Roblox `Model` named **Flower** in `Workspace` (containing at least one BasePart). This should be the same Flower already placed in Studio. With at least one player on the server:
